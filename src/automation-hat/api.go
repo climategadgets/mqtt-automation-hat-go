@@ -19,6 +19,8 @@ type AutomationHAT interface {
 
 	// 1 x 12-bit ADC @ 0-3.3V
 	ADC12()  ADC
+
+	StatusLights() StatusLights
 }
 
 type Switch interface {
@@ -45,6 +47,14 @@ type Input interface {
 type Output interface {
 
 	Light() [3]Light
+}
+
+
+type StatusLights interface {
+
+	Power() Light
+	Comms() Light
+	Warn() Light
 }
 
 type Light interface {
