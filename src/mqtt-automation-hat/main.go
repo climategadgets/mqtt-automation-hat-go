@@ -40,12 +40,11 @@ func main() {
 		panic(token.Error())
 	}
 
+	defer c.Disconnect(250);
+
 	// VT: NOTE: Now we wait until we're interrupted
 
 	select {}
-
-	// VT: FIXME: Need to install interrupt handler to shut things down cleanly before leaving
-	// c.Disconnect(250)
 }
 
 func receive(client mqtt.Client, message mqtt.Message) {
