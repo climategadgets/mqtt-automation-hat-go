@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-type automation_hat struct {
+type automationHat struct {
 	adc24  [3]ADC24
 	input  [3]Input
 	output [3]Output
@@ -14,18 +14,18 @@ type automation_hat struct {
 	status StatusLights
 }
 
-type status_lights struct {
+type statusLights struct {
 	power Light
 	comms Light
 	warn  Light
 }
 
-type hat_locker struct {
+type hatLocker struct {
 	mu  sync.Mutex
 	hat AutomationHAT
 }
 
-var theHat hat_locker
+var theHat hatLocker
 
 // Obtain access to the AutomationHAT singleton instance.
 // This method performs lazy initialization, the instance doesn't exist before first invocation.
@@ -45,7 +45,7 @@ func newAutomationHAT() AutomationHAT {
 
 	log.Info("creating new instance of AutomationHAT")
 
-	hat := automation_hat{}
+	hat := automationHat{}
 
 	hat.adc24[0] = GetADC24(0, 25.85, 0)
 	hat.adc24[1] = GetADC24(1, 25.85, 1)
@@ -65,43 +65,43 @@ func newAutomationHAT() AutomationHAT {
 
 	hat.adc33 = GetADC33(3, 3.3)
 
-	hat.status = status_lights{power: GetLED(17), comms: GetLED(16), warn: GetLED(15)}
+	hat.status = statusLights{power: GetLED(17), comms: GetLED(16), warn: GetLED(15)}
 
 	return hat
 }
 
-func (hat automation_hat) Relay() [3]Relay {
+func (hat automationHat) Relay() [3]Relay {
 	return hat.relay
 }
 
-func (hat automation_hat) ADC24() [3]ADC24 {
+func (hat automationHat) ADC24() [3]ADC24 {
 	return hat.adc24
 }
 
-func (hat automation_hat) Input() [3]Input {
+func (hat automationHat) Input() [3]Input {
 	return hat.input
 }
 
-func (hat automation_hat) Output() [3]Output {
+func (hat automationHat) Output() [3]Output {
 	return hat.output
 }
 
-func (hat automation_hat) ADC33() ADC33 {
+func (hat automationHat) ADC33() ADC33 {
 	return hat.adc33
 }
 
-func (hat automation_hat) StatusLights() StatusLights {
+func (hat automationHat) StatusLights() StatusLights {
 	return hat.status
 }
 
-func (sl status_lights) Power() Light {
+func (sl statusLights) Power() Light {
 	return sl.power
 }
 
-func (sl status_lights) Comms() Light {
+func (sl statusLights) Comms() Light {
 	return sl.comms
 }
 
-func (sl status_lights) Warn() Light {
+func (sl statusLights) Warn() Light {
 	return sl.warn
 }

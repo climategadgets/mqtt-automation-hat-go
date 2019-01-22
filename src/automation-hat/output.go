@@ -2,7 +2,7 @@ package automation_hat
 
 type output struct {
 	pin int
-	led_container
+	ledContainer
 }
 
 func GetOutput(pin int, ledPin int) Output {
