@@ -39,6 +39,8 @@ func GetAutomationHAT() AutomationHAT {
 
 	hat.adc33 = GetADC33(3, 3.3)
 
+	hat.status = status_lights{power:GetLED(17), comms: GetLED(16), warn:GetLED(15)}
+
 	return hat
 }
 
