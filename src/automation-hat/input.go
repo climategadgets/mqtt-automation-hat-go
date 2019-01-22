@@ -7,7 +7,7 @@ type input struct {
 
 func GetInput(pin int, ledPin int) Input {
 
-	return input{ pin: pin, led: GetLED(ledPin)}
+	return input{pin: pin, led: GetLED(ledPin)}
 }
 
 func (i input) Light() Light {

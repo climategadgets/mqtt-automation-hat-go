@@ -1,8 +1,8 @@
 package automation_hat
 
 type light struct {
-	pin int
-	state bool
+	pin        int
+	state      bool
 	brightness float64
 }
 
@@ -22,5 +22,5 @@ func (l light) Set(state bool) bool {
 
 func GetLED(pin int) Light {
 
-	return light{ pin: pin}
+	return light{pin: pin}
 }

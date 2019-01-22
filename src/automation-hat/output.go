@@ -7,7 +7,7 @@ type output struct {
 
 func GetOutput(pin int, ledPin int) Output {
 
-	return output{ pin: pin, led: GetLED(ledPin)}
+	return output{pin: pin, led: GetLED(ledPin)}
 }
 
 func (o output) Light() Light {

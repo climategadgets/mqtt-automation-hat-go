@@ -1,11 +1,11 @@
 package automation_hat
 
 type automation_hat struct {
-	adc24 [3]ADC
-	input [3]Input
-	output [3] Output
-	relay [3] Relay
-	adc12 ADC
+	adc24  [3]ADC
+	input  [3]Input
+	output [3]Output
+	relay  [3]Relay
+	adc12  ADC
 	status StatusLights
 }
 

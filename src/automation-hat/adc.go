@@ -1,10 +1,9 @@
 package automation_hat
 
 type adc struct {
-
-	channel int
+	channel    int
 	maxVoltage float64
-	led Light
+	led        Light
 }
 
 func (adc adc) Light() Light {
@@ -13,6 +12,5 @@ func (adc adc) Light() Light {
 
 func GetADC24(channel int, maxVoltage float64, ledPin int) ADC {
 
-	return adc{ channel: channel, maxVoltage: maxVoltage, led: GetLED(ledPin) }
+	return adc{channel: channel, maxVoltage: maxVoltage, led: GetLED(ledPin)}
 }
-

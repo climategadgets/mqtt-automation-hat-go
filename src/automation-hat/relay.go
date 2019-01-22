@@ -2,10 +2,10 @@ package automation_hat
 
 type relay struct {
 	state bool
-	pin int
+	pin   int
 	ledNO int
 	ledNC int
-	led [2]Light
+	led   [2]Light
 }
 
 func GetRelay(pin int, ledNO int, ledNC int) Relay {

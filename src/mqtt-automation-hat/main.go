@@ -5,8 +5,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"github.com/eclipse/paho.mqtt.golang"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -15,6 +15,7 @@ var (
 	brokerPort = flag.Int("broker-port", 1883, "MQTT broker port to use")
 	rootTopic  = flag.String("root-topic", "", "Root topic to listen to")
 )
+
 func main() {
 	flag.Parse()
 
@@ -40,7 +41,7 @@ func main() {
 		panic(token.Error())
 	}
 
-	defer c.Disconnect(250);
+	defer c.Disconnect(250)
 
 	// VT: NOTE: Now we wait until we're interrupted
 
@@ -49,6 +50,5 @@ func main() {
 
 func receive(client mqtt.Client, message mqtt.Message) {
 	log.Info(fmt.Sprintf("%s %s", message.Topic(), message.Payload()))
-
 
 }
