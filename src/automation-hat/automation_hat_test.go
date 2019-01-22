@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// Make sure only a single instance is created
 func TestGetAutomationHAT(t *testing.T) {
 
 	hat1 := GetAutomationHAT()
