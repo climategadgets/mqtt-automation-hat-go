@@ -1,6 +1,9 @@
 package automation_hat
 
-import "sync"
+import (
+	log "github.com/sirupsen/logrus"
+	"sync"
+)
 
 type automation_hat struct {
 	adc24  [3]ADC24
@@ -18,7 +21,7 @@ type status_lights struct {
 }
 
 type hat_locker struct {
-	mu sync.Mutex
+	mu  sync.Mutex
 	hat AutomationHAT
 }
 
@@ -40,6 +43,8 @@ func GetAutomationHAT() AutomationHAT {
 
 func newAutomationHAT() AutomationHAT {
 
+	log.Info("creating new instance of AutomationHAT")
+
 	hat := automation_hat{}
 
 	hat.adc24[0] = GetADC24(0, 25.85, 0)
@@ -60,7 +65,7 @@ func newAutomationHAT() AutomationHAT {
 
 	hat.adc33 = GetADC33(3, 3.3)
 
-	hat.status = status_lights{power:GetLED(17), comms: GetLED(16), warn:GetLED(15)}
+	hat.status = status_lights{power: GetLED(17), comms: GetLED(16), warn: GetLED(15)}
 
 	return hat
 }
