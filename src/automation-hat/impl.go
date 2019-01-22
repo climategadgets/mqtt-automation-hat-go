@@ -1,5 +1,7 @@
 package automation_hat
 
+import "sync"
+
 type automation_hat struct {
 	adc24  [3]ADC24
 	input  [3]Input
@@ -15,9 +17,28 @@ type status_lights struct {
 	warn  Light
 }
 
+type hat_locker struct {
+	mu sync.Mutex
+	hat AutomationHAT
+}
+
+var theHat hat_locker
+
 // Obtain access to the AutomationHAT singleton instance.
 // This method performs lazy initialization, the instance doesn't exist before first invocation.
 func GetAutomationHAT() AutomationHAT {
+
+	theHat.mu.Lock()
+	defer theHat.mu.Unlock()
+
+	if theHat.hat == nil {
+		theHat.hat = newAutomationHAT()
+	}
+
+	return theHat.hat
+}
+
+func newAutomationHAT() AutomationHAT {
 
 	hat := automation_hat{}
 
