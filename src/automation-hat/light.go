@@ -24,3 +24,11 @@ func GetLED(pin int) Light {
 
 	return light{pin: pin}
 }
+
+type led_container struct {
+	led Light
+}
+
+func (l led_container) Light() Light {
+	return l.led
+}

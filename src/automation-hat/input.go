@@ -2,12 +2,16 @@ package automation_hat
 
 type input struct {
 	pin int
-	led Light
+	led_container
 }
 
 func GetInput(pin int, ledPin int) Input {
 
-	return input{pin: pin, led: GetLED(ledPin)}
+	result := input{pin: pin}
+
+	result.led = GetLED(ledPin)
+
+	return result
 }
 
 func (i input) Light() Light {

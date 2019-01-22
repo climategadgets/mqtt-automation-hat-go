@@ -2,12 +2,16 @@ package automation_hat
 
 type output struct {
 	pin int
-	led Light
+	led_container
 }
 
 func GetOutput(pin int, ledPin int) Output {
 
-	return output{pin: pin, led: GetLED(ledPin)}
+	result := output{pin: pin}
+
+	result.led = GetLED(ledPin)
+
+	return result
 }
 
 func (o output) Light() Light {
