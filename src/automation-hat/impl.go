@@ -1,11 +1,11 @@
 package automation_hat
 
 type automation_hat struct {
-	adc24  [3]ADC
+	adc24  [3]ADC24
 	input  [3]Input
 	output [3]Output
 	relay  [3]Relay
-	adc12  ADC
+	adc33  ADC33
 	status StatusLights
 }
 
@@ -37,6 +37,8 @@ func GetAutomationHAT() AutomationHAT {
 	hat.relay[1] = GetRelay(19, 8, 9)
 	hat.relay[2] = GetRelay(16, 10, 11)
 
+	hat.adc33 = GetADC33(3, 3.3)
+
 	return hat
 }
 
@@ -44,7 +46,7 @@ func (hat automation_hat) Relay() [3]Relay {
 	return hat.relay
 }
 
-func (hat automation_hat) ADC24() [3]ADC {
+func (hat automation_hat) ADC24() [3]ADC24 {
 	return hat.adc24
 }
 
@@ -56,8 +58,8 @@ func (hat automation_hat) Output() [3]Output {
 	return hat.output
 }
 
-func (hat automation_hat) ADC12() ADC {
-	return hat.adc12
+func (hat automation_hat) ADC33() ADC33 {
+	return hat.adc33
 }
 
 func (hat automation_hat) StatusLights() StatusLights {

@@ -6,7 +6,7 @@ package automation_hat
 type AutomationHAT interface {
 
 	// 3 x 12-bit ADC @ 0-24V (±2% accuracy)
-	ADC24() [3]ADC
+	ADC24() [3]ADC24
 
 	// 3 x 24V tolerant buffered inputs
 	Input() [3]Input
@@ -15,7 +15,7 @@ type AutomationHAT interface {
 	Output() [3]Output
 
 	// 1 x 12-bit ADC @ 0-3.3V
-	ADC12() ADC
+	ADC33() ADC33
 
 	// 3 x 24V @ 2A relays (NC and NO terminals)
 	Relay() [3]Relay
@@ -38,7 +38,11 @@ type Relay interface {
 	Light() [2]Light
 }
 
-type ADC interface {
+type ADC33 interface {
+}
+
+type ADC24 interface {
+	ADC33
 	Light() Light
 }
 
