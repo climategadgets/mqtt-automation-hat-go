@@ -5,9 +5,6 @@ package automation_hat
 
 type AutomationHAT interface {
 
-	// 3 x 24V @ 2A relays (NC and NO terminals)
-	Relay()  [3]Relay
-
 	// 3 x 12-bit ADC @ 0-24V (±2% accuracy)
 	ADC24()  [3]ADC
 
@@ -20,33 +17,41 @@ type AutomationHAT interface {
 	// 1 x 12-bit ADC @ 0-3.3V
 	ADC12()  ADC
 
+	// 3 x 24V @ 2A relays (NC and NO terminals)
+	Relay()  [3]Relay
+
 	StatusLights() StatusLights
 }
 
 type Switch interface {
+
+	// Get current state
 	Get() bool
-	Set(bool)
+
+	// Set new state
+	// Return true if the state is different from the old, false otherwise
+	Set(bool) bool
 }
 
 type Relay interface {
 
-	Switch()
+	Switch
 	Light() [2]Light
 }
 
 type ADC interface {
 
-	Light() [3]Light
+	Light() Light
 }
 
 type Input interface {
 
-	Light() [3]Light
+	Light() Light
 }
 
 type Output interface {
 
-	Light() [3]Light
+	Light() Light
 }
 
 
@@ -59,5 +64,5 @@ type StatusLights interface {
 
 type Light interface {
 
-	Switch()
+	Switch
 }
