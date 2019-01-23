@@ -3,7 +3,10 @@
 // Baseline Python code is available at https://github.com/pimoroni/automation-hat
 package automation_hat
 
+import "io"
+
 type AutomationHAT interface {
+	io.Closer
 
 	// 3 x 12-bit ADC @ 0-24V (±2% accuracy)
 	ADC24() [3]ADC24

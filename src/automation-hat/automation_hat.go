@@ -70,6 +70,11 @@ func newAutomationHAT() AutomationHAT {
 	return hat
 }
 
+func (hat automationHat) Close() error {
+
+	return nil
+}
+
 func (hat automationHat) Relay() [3]Relay {
 	return hat.relay
 }
