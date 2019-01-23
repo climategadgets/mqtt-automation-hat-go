@@ -2,13 +2,13 @@ package automation_hat
 
 type relay struct {
 	state bool
-	pin   int
-	ledNO int
-	ledNC int
+	pin   uint8
+	ledNO uint8
+	ledNC uint8
 	led   [2]Light
 }
 
-func GetRelay(pin int, ledNO int, ledNC int) Relay {
+func GetRelay(pin uint8, ledNO uint8, ledNC uint8) Relay {
 
 	r := &relay{pin: pin, ledNO: ledNO, ledNC: ledNC}
 

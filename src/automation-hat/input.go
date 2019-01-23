@@ -1,11 +1,11 @@
 package automation_hat
 
 type input struct {
-	pin int
+	pin uint8
 	ledContainer
 }
 
-func GetInput(pin int, ledPin int) Input {
+func GetInput(pin uint8, ledPin uint8) Input {
 	return input{pin: pin, ledContainer: ledContainer{GetLED(ledPin)}}
 }
 

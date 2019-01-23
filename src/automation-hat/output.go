@@ -1,11 +1,11 @@
 package automation_hat
 
 type output struct {
-	pin int
+	pin uint8
 	ledContainer
 }
 
-func GetOutput(pin int, ledPin int) Output {
+func GetOutput(pin uint8, ledPin uint8) Output {
 	return output{pin: pin, ledContainer: ledContainer{GetLED(ledPin)}}
 }
 
