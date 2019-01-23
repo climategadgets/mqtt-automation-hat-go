@@ -2,6 +2,7 @@ package automation_hat
 
 import (
 	log "github.com/sirupsen/logrus"
+	"github.com/stianeikeland/go-rpio"
 	"sync"
 )
 
@@ -67,12 +68,17 @@ func newAutomationHAT() AutomationHAT {
 
 	hat.status = statusLights{power: GetLED(17), comms: GetLED(16), warn: GetLED(15)}
 
+	// VT: NOTE: We can safely assume that since someone's created an instance,
+	// they're going to use it
+
+	rpio.Open()
+
 	return hat
 }
 
 func (hat automationHat) Close() error {
 
-	return nil
+	return rpio.Close()
 }
 
 func (hat automationHat) Relay() [3]Relay {
