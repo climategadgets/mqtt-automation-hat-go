@@ -12,7 +12,7 @@ func (l light) Get() bool {
 
 func (l light) Set(state bool) bool {
 
-	changed := l.state == state
+	changed := l.state != state
 
 	// VT: FIXME: Need to implement the state change, though
 	l.state = state

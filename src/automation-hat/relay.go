@@ -24,7 +24,7 @@ func (r relay) Get() bool {
 
 func (r relay) Set(state bool) bool {
 
-	changed := r.state == state
+	changed := r.state != state
 
 	// VT: FIXME: Need to implement the state change, though
 	r.state = state
