@@ -6,12 +6,7 @@ type output struct {
 }
 
 func GetOutput(pin int, ledPin int) Output {
-
-	result := output{pin: pin}
-
-	result.led = GetLED(ledPin)
-
-	return result
+	return output{pin: pin, ledContainer: ledContainer{GetLED(ledPin)}}
 }
 
 func (o output) Light() Light {

@@ -21,7 +21,6 @@ func (l light) Set(state bool) bool {
 }
 
 func GetLED(pin int) Light {
-
 	return light{pin: pin}
 }
 

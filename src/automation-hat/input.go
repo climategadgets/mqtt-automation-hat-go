@@ -6,12 +6,7 @@ type input struct {
 }
 
 func GetInput(pin int, ledPin int) Input {
-
-	result := input{pin: pin}
-
-	result.led = GetLED(ledPin)
-
-	return result
+	return input{pin: pin, ledContainer: ledContainer{GetLED(ledPin)}}
 }
 
 func (i input) Light() Light {

@@ -13,19 +13,9 @@ type adcLed struct {
 }
 
 func GetADC33(channel int, maxVoltage float64) ADC33 {
-
-	result := adc{channel: channel, maxVoltage: maxVoltage}
-
-	return result
+	return adc{channel: channel, maxVoltage: maxVoltage}
 }
 
 func GetADC24(channel int, maxVoltage float64, ledPin int) ADC24 {
-
-	result := adcLed{}
-
-	result.channel = channel
-	result.maxVoltage = maxVoltage
-	result.led = GetLED(ledPin)
-
-	return result
+	return adcLed{adc: adc{channel: channel, maxVoltage: maxVoltage}, ledContainer: ledContainer{GetLED(ledPin)}}
 }
