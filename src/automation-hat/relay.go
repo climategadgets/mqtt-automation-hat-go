@@ -10,7 +10,7 @@ type relay struct {
 
 func GetRelay(pin int, ledNO int, ledNC int) Relay {
 
-	r := relay{pin: pin, ledNO: ledNO, ledNC: ledNC}
+	r := &relay{pin: pin, ledNO: ledNO, ledNC: ledNC}
 
 	r.led[0] = GetLED(ledNO)
 	r.led[1] = GetLED(ledNC)
@@ -22,7 +22,7 @@ func (r relay) Get() bool {
 	return r.state
 }
 
-func (r relay) Set(state bool) bool {
+func (r *relay) Set(state bool) bool {
 
 	changed := r.state != state
 

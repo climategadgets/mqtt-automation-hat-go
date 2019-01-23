@@ -10,7 +10,7 @@ func (l light) Get() bool {
 	return l.state
 }
 
-func (l light) Set(state bool) bool {
+func (l *light) Set(state bool) bool {
 
 	changed := l.state != state
 
@@ -21,7 +21,7 @@ func (l light) Set(state bool) bool {
 }
 
 func GetLED(pin int) Light {
-	return light{pin: pin}
+	return &light{pin: pin}
 }
 
 type ledContainer struct {

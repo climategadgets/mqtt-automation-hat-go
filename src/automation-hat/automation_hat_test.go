@@ -41,4 +41,8 @@ func testSwitch(t *testing.T, s Switch) {
 	if !changed {
 		t.Fatalf(fmt.Sprintf("failed to change state from %t: %s", state, s))
 	}
+
+	if s.Get() != !state {
+		t.Fatalf(fmt.Sprintf("state didn't change from %t to %t for %s", state, !state, s))
+	}
 }
