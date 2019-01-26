@@ -3,7 +3,7 @@
 package hcc_shared
 
 type HccMessageBase struct {
-	Timestamp string `json:"timestamp"`
+	Timestamp uint64 `json:"timestamp"`
 	Name      string `json:"name"`
 	Signature string `json:"signature"`
 }
