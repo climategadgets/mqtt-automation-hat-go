@@ -9,7 +9,10 @@ import (
 	"github.com/climategadgets/mqtt-automation-hat-go/src/hcc-shared"
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
+	"os"
+	"os/signal"
 	"sync"
+	"time"
 )
 
 var (
@@ -44,7 +47,49 @@ func main() {
 		panic(token.Error())
 	}
 
-	defer c.Disconnect(250)
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+
+	go func() {
+		for sig := range sig {
+			log.Infof("captured %v signal, shutting down", sig)
+
+			var done sync.WaitGroup
+			done.Add(2)
+
+			now := time.Now()
+
+			// Shut down MQTT client
+			go func() {
+
+				now := time.Now()
+
+				c.Disconnect(250)
+
+				duration := time.Since(now)
+
+				log.Infof("MQTT disconnected in %v", duration)
+
+				done.Done()
+			}()
+
+			// Shut down the Automation HAT
+			go func() {
+
+				// VT: FIXME: Need to actually do it
+
+				done.Done()
+			}()
+
+			done.Wait()
+			duration := time.Since(now)
+
+			log.Infof("shut down in %v", duration)
+
+			log.Infof("bye")
+			os.Exit(0)
+		}
+	}()
 
 	// VT: NOTE: Now we wait until we're interrupted
 
