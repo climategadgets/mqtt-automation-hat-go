@@ -38,7 +38,7 @@ func main() {
 	automationHat := automation_hat.GetAutomationHAT()
 	mqttClient := initMqttClient(target, topicFilter, automationHat)
 
-	installShutDownHandler(mqttClient)
+	installShutDownHandler(mqttClient, automationHat)
 
 	// VT: NOTE: Now we wait until we're interrupted
 
@@ -67,7 +67,7 @@ func initMqttClient(target string, topicFilter string, automationHat automation_
 	return result
 }
 
-func installShutDownHandler(mqttClient mqtt.Client) {
+func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat.AutomationHAT) {
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
@@ -98,7 +98,16 @@ func installShutDownHandler(mqttClient mqtt.Client) {
 			// Shut down the Automation HAT
 			go func() {
 
-				// VT: FIXME: Need to actually do it
+				now := time.Now()
+
+				// VT: FIXME: Commented out until the protocol handler is finished - blows up
+				// on i386
+				// automationHat.Close()
+				log.Error("FIXME: AutomationHat.Close() disabled")
+
+				duration := time.Since(now)
+
+				log.Infof("AutomationHAT shut down in %v", duration)
 
 				done.Done()
 			}()
