@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/climategadgets/mqtt-automation-hat-go/src/automation-hat"
 	"github.com/climategadgets/mqtt-automation-hat-go/src/hcc-shared"
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -35,7 +36,8 @@ func main() {
 	log.Info("connecting to broker: " + target)
 	log.Info("topic filter: " + topicFilter)
 
-	mqttClient := initMqttClient(target, topicFilter)
+	automationHat := automation_hat.GetAutomationHAT()
+	mqttClient := initMqttClient(target, topicFilter, automationHat)
 
 	installShutDownHandler(mqttClient)
 
@@ -45,7 +47,7 @@ func main() {
 }
 
 // Create MQTT client and subscribe
-func initMqttClient(target string, topicFilter string) mqtt.Client {
+func initMqttClient(target string, topicFilter string, automationHat automation_hat.AutomationHAT) mqtt.Client {
 
 	opts := mqtt.NewClientOptions().AddBroker(target).SetClientID("mqtt-automation-hat").SetCleanSession(true)
 
@@ -53,6 +55,10 @@ func initMqttClient(target string, topicFilter string) mqtt.Client {
 
 	if token := result.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
+	}
+
+	receive := func(client mqtt.Client, message mqtt.Message) {
+		receive(client, message, automationHat)
 	}
 
 	if token := result.Subscribe(topicFilter, 2, receive); token.Wait() && token.Error() != nil {
@@ -109,7 +115,7 @@ func installShutDownHandler(mqttClient mqtt.Client) {
 	}()
 }
 
-func receive(client mqtt.Client, message mqtt.Message) {
+func receive(client mqtt.Client, message mqtt.Message, automationHat automation_hat.AutomationHAT) {
 	log.Debug(fmt.Sprintf("%s %s", message.Topic(), message.Payload()))
 
 	// Let's allow some redundancy and try parsing the payload for several types we know about in parallel,
