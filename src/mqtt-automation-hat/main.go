@@ -83,6 +83,7 @@ func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat
 
 			// Shut down MQTT client
 			go func() {
+				defer done.Done()
 
 				now := time.Now()
 
@@ -91,12 +92,11 @@ func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat
 				duration := time.Since(now)
 
 				log.Infof("MQTT disconnected in %v", duration)
-
-				done.Done()
 			}()
 
 			// Shut down the Automation HAT
 			go func() {
+				defer done.Done()
 
 				now := time.Now()
 
@@ -108,8 +108,6 @@ func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat
 				duration := time.Since(now)
 
 				log.Infof("AutomationHAT shut down in %v", duration)
-
-				done.Done()
 			}()
 
 			done.Wait()
