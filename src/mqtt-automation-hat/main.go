@@ -37,13 +37,13 @@ func main() {
 
 	opts := mqtt.NewClientOptions().AddBroker(target).SetClientID("mqtt-automation-hat").SetCleanSession(true)
 
-	c := mqtt.NewClient(opts)
+	mqttClient := mqtt.NewClient(opts)
 
-	if token := c.Connect(); token.Wait() && token.Error() != nil {
+	if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
 
-	if token := c.Subscribe(topicFilter, 2, receive); token.Wait() && token.Error() != nil {
+	if token := mqttClient.Subscribe(topicFilter, 2, receive); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
 
@@ -64,7 +64,7 @@ func main() {
 
 				now := time.Now()
 
-				c.Disconnect(250)
+				mqttClient.Disconnect(250)
 
 				duration := time.Since(now)
 
