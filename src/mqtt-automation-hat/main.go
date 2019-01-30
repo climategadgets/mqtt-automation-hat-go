@@ -35,17 +35,34 @@ func main() {
 	log.Info("connecting to broker: " + target)
 	log.Info("topic filter: " + topicFilter)
 
+	mqttClient := initMqttClient(target, topicFilter)
+
+	installShutDownHandler(mqttClient)
+
+	// VT: NOTE: Now we wait until we're interrupted
+
+	select {}
+}
+
+// Create MQTT client and subscribe
+func initMqttClient(target string, topicFilter string) mqtt.Client {
+
 	opts := mqtt.NewClientOptions().AddBroker(target).SetClientID("mqtt-automation-hat").SetCleanSession(true)
 
-	mqttClient := mqtt.NewClient(opts)
+	result := mqtt.NewClient(opts)
 
-	if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
+	if token := result.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
 
-	if token := mqttClient.Subscribe(topicFilter, 2, receive); token.Wait() && token.Error() != nil {
+	if token := result.Subscribe(topicFilter, 2, receive); token.Wait() && token.Error() != nil {
 		panic(token.Error())
 	}
+
+	return result
+}
+
+func installShutDownHandler(mqttClient mqtt.Client) {
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt)
@@ -90,10 +107,6 @@ func main() {
 			os.Exit(0)
 		}
 	}()
-
-	// VT: NOTE: Now we wait until we're interrupted
-
-	select {}
 }
 
 func receive(client mqtt.Client, message mqtt.Message) {
