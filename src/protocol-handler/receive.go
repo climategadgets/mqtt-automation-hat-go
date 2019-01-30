@@ -32,7 +32,7 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 			return
 		}
 
-		log.Info("switch: ", payload)
+		log.Infof("switch: %v %v", message.Topic(), payload)
 		parsed = true
 	}()
 
@@ -47,7 +47,7 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 			return
 		}
 
-		log.Info("sensor: ", payload)
+		log.Infof("sensor: %v %v", message.Topic(), payload)
 		parsed = true
 	}()
 
