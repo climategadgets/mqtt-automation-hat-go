@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/climategadgets/mqtt-automation-hat-go/src/automation-hat"
+	"github.com/climategadgets/mqtt-automation-hat-go/src/cf"
 	"github.com/climategadgets/mqtt-automation-hat-go/src/protocol-handler"
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -16,6 +17,7 @@ import (
 )
 
 var (
+	config     = flag.String("config", cf.GetDefaultConfigLocation(), "Configuration file location")
 	debug      = flag.Bool("debug", false, "enable verbose logging")
 	brokerHost = flag.String("broker-host", "localhost", "MQTT broker host to use")
 	brokerPort = flag.Int("broker-port", 1883, "MQTT broker port to use")
@@ -34,9 +36,11 @@ func main() {
 
 	log.Info("connecting to broker: " + target)
 	log.Info("topic filter: " + topicFilter)
+	log.Info("configuration: " + *config)
 
+	switchMap := cf.ReadConfig(*config)
 	automationHat := automation_hat.GetAutomationHAT()
-	mqttClient := initMqttClient(target, topicFilter, automationHat)
+	mqttClient := initMqttClient(target, topicFilter, automationHat, switchMap)
 
 	installShutDownHandler(mqttClient, automationHat)
 
@@ -46,7 +50,7 @@ func main() {
 }
 
 // Create MQTT client and subscribe
-func initMqttClient(target string, topicFilter string, automationHat automation_hat.AutomationHAT) mqtt.Client {
+func initMqttClient(target string, topicFilter string, automationHat automation_hat.AutomationHAT, switchMap cf.ConfigSwitchMap) mqtt.Client {
 
 	opts := mqtt.NewClientOptions().AddBroker(target).SetClientID("mqtt-automation-hat").SetCleanSession(true)
 
