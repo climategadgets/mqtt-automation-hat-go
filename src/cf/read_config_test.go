@@ -72,3 +72,17 @@ func TestUnmarshalSwitchMap(t *testing.T) {
 
 	t.Logf("switch config/unmarshal: %v", switchMap)
 }
+
+func TestUnmarshalConfig(t *testing.T) {
+
+	buffer := []byte("{\"entry\":{\"0\":{\"topic\":\"Topic0\"},\"1\":{\"topic\":\"Topic1\",\"inverted\":true}}}")
+	config := make(map[string]ConfigSwitchMap)
+
+	err := json.Unmarshal(buffer, &config)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("config/unmarshal: %v", config)
+}

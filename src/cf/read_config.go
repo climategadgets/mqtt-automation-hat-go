@@ -14,6 +14,7 @@ type SwitchConfig struct {
 }
 
 type ConfigSwitchMap map[string]SwitchConfig
+type ConfigHAT map[string]ConfigSwitchMap
 
 func GetDefaultConfigLocation() string {
 
@@ -26,14 +27,14 @@ func GetDefaultConfigLocation() string {
 	return usr.HomeDir + "/.mqtt-automation-hat/config.json"
 }
 
-func ReadConfig(source string) ConfigSwitchMap {
+func ReadConfig(source string) ConfigHAT {
 
 	return readConfig(source, false)
 }
 
 // Read the configuration from given source file.
 // If 'again' is true, that means that we've just tried to create a default configuration, and should fail immediately.
-func readConfig(source string, again bool) ConfigSwitchMap {
+func readConfig(source string, again bool) ConfigHAT {
 
 	// Let's first make sure that the file is there, readable and parseable
 	jsonFile, err0 := os.Open(source)
@@ -65,14 +66,14 @@ func readConfig(source string, again bool) ConfigSwitchMap {
 		log.Fatalf("couldn't read configuration from "+source+", %v", err1)
 	}
 
-	var result ConfigSwitchMap
+	result := make(ConfigHAT)
 	err2 := json.Unmarshal(buffer, &result)
 
 	if err2 != nil {
 		log.Fatalf("couldn't read configuration from "+source+", %v", err2)
 	}
 
-	log.Warnf("configuration: %v", result)
+	log.Infof("configuration: %v", result)
 
 	return result
 }

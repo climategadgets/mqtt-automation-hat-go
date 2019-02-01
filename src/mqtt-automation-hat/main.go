@@ -50,7 +50,7 @@ func main() {
 }
 
 // Create MQTT client and subscribe
-func initMqttClient(target string, topicFilter string, automationHat automation_hat.AutomationHAT, switchMap cf.ConfigSwitchMap) mqtt.Client {
+func initMqttClient(target string, topicFilter string, automationHat automation_hat.AutomationHAT, switchMap cf.ConfigHAT) mqtt.Client {
 
 	opts := mqtt.NewClientOptions().AddBroker(target).SetClientID("mqtt-automation-hat").SetCleanSession(true)
 
