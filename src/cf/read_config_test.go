@@ -44,3 +44,31 @@ func TestUnmarshalReadSwitchConfigInverted(t *testing.T) {
 
 	t.Logf("switch config/unmarshal: %v", sc)
 }
+
+func TestMarshalSwitchMap(t *testing.T) {
+	switchMap := make(ConfigSwitchMap)
+	switchMap["0"] = SwitchConfig{"Topic0", false}
+	switchMap["1"] = SwitchConfig{"Topic1", true}
+
+	buffer, err := json.Marshal(switchMap)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("switch map/marshal: %s", buffer)
+}
+
+func TestUnmarshalSwitchMap(t *testing.T) {
+
+	buffer := []byte("{\"0\":{\"topic\":\"Topic0\"},\"1\":{\"topic\":\"Topic1\",\"inverted\":true}}")
+	switchMap := make(ConfigSwitchMap)
+
+	err := json.Unmarshal(buffer, &switchMap)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("switch config/unmarshal: %v", switchMap)
+}
