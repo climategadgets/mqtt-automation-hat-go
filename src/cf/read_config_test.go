@@ -70,7 +70,7 @@ func TestUnmarshalSwitchMap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Logf("switch config/unmarshal: %v", switchMap)
+	t.Logf("switch map/unmarshal: %v", switchMap)
 }
 
 func TestUnmarshalConfig(t *testing.T) {
