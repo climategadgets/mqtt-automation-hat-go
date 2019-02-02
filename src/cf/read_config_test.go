@@ -59,7 +59,7 @@ func TestMarshalSwitchMap(t *testing.T) {
 	t.Logf("switch map/marshal: %s", buffer)
 }
 
-func TestUnmarshalSwitchMap(t *testing.T) {
+func TestUnmarshalSwitchMapStraight(t *testing.T) {
 
 	buffer := []byte("{\"0\":{\"topic\":\"Topic0\"},\"1\":{\"topic\":\"Topic1\",\"inverted\":true}}")
 	switchMap := make(ConfigSwitchMap)
@@ -70,7 +70,21 @@ func TestUnmarshalSwitchMap(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Logf("switch map/unmarshal: %v", switchMap)
+	t.Logf("switch map/unmarshal/A: %v", switchMap)
+}
+
+func TestUnmarshalSwitchMapSwapped(t *testing.T) {
+
+	buffer := []byte("{\"0\":{\"topic\":\"Topic0\"},\"1\":{\"inverted\":true,\"topic\":\"Topic1\"}}")
+	switchMap := make(ConfigSwitchMap)
+
+	err := json.Unmarshal(buffer, &switchMap)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("switch map/unmarshal/B: %v", switchMap)
 }
 
 func TestUnmarshalConfig(t *testing.T) {
