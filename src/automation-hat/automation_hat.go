@@ -48,6 +48,11 @@ func newAutomationHAT() AutomationHAT {
 
 	hat := automationHat{}
 
+	// Pinout: https://pinout.xyz/pinout/automation_hat#
+
+	// Input and output numbers are BCM pin numbers
+	// LED numbers are from a different namespace (SN3218 PWM driver)
+
 	hat.adc24[0] = GetADC24(0, 25.85, 0)
 	hat.adc24[1] = GetADC24(1, 25.85, 1)
 	hat.adc24[2] = GetADC24(2, 25.85, 2)
