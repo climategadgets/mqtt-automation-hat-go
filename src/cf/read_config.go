@@ -78,7 +78,29 @@ func readConfig(source string, again bool) ConfigHAT {
 	return result
 }
 
-func createDefaultConfig(source string) {
+var defaultConfig = `{
+  "switchMap": {
+    "0": {
+      "topic": "/pimoroni/automation-hat/switch/0",
+      "inverted": false
+    },
+    "1": {
+      "topic": "/pimoroni/automation-hat/switch/1",
+      "inverted": false
+    },
+    "2": {
+      "topic": "/pimoroni/automation-hat/switch/2",
+      "inverted": false
+    }
+  }
+}`
 
-	log.Warn("FIXME: createDefaultConfig()")
+func createDefaultConfig(target string) {
+
+	payload := []byte(defaultConfig)
+	err := ioutil.WriteFile(target, payload, 0644)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
