@@ -10,7 +10,7 @@ import (
 
 type SwitchConfig struct {
 	Topic    string `json:"topic"`
-	Inverted bool `json:"inverted"`
+	Inverted bool   `json:"inverted"`
 }
 
 type ConfigSwitchMap map[string]SwitchConfig

@@ -7,7 +7,7 @@ import (
 
 func TestMarshalReadSwitchConfig(t *testing.T) {
 
-	sc := SwitchConfig{ "Topic0", true}
+	sc := SwitchConfig{"Topic0", true}
 	buffer, err := json.Marshal(sc)
 
 	if err != nil {
