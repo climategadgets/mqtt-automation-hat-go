@@ -36,10 +36,20 @@ func GetAutomationHAT() AutomationHAT {
 	defer theHat.mu.Unlock()
 
 	if theHat.hat == nil {
-		theHat.hat = newAutomationHAT()
+
+		if GetRaspberryPiRevision() != nil {
+			theHat.hat = newAutomationHAT()
+		} else {
+			theHat.hat = newAutomationFake()
+		}
 	}
 
 	return theHat.hat
+}
+
+func newAutomationFake() AutomationHAT {
+	log.Warn("FIXME: returning actual HAT instead of the fake")
+	return newAutomationHAT()
 }
 
 func newAutomationHAT() AutomationHAT {
