@@ -13,10 +13,13 @@ type SwitchConfig struct {
 	Inverted bool   `json:"inverted"`
 }
 
+var defaultCfDir = ".mqtt-automation-hat"
+var defaultCfFile = "config.json"
+
 type ConfigSwitchMap map[string]SwitchConfig
 type ConfigHAT map[string]ConfigSwitchMap
 
-func GetDefaultConfigLocation() string {
+func getDefaultConfigDir() string {
 
 	usr, err := user.Current()
 
@@ -24,7 +27,12 @@ func GetDefaultConfigLocation() string {
 		log.Fatal(err)
 	}
 
-	return usr.HomeDir + "/.mqtt-automation-hat/config.json"
+	return usr.HomeDir + string(os.PathSeparator) + defaultCfDir
+}
+
+func GetDefaultConfigLocation() string {
+
+	return getDefaultConfigDir() + string(os.PathSeparator) + defaultCfFile
 }
 
 func ReadConfig(source string) ConfigHAT {
@@ -97,10 +105,24 @@ var defaultConfig = `{
 
 func createDefaultConfig(target string) {
 
-	payload := []byte(defaultConfig)
-	err := ioutil.WriteFile(target, payload, 0644)
+	cfDir := getDefaultConfigDir()
 
-	if err != nil {
-		log.Fatal(err)
+	_, err := os.Stat(cfDir)
+
+	if (os.IsNotExist(err)) {
+		err := os.Mkdir(cfDir, 0755);
+
+		if err != nil {
+			log.Fatalf("can't create directory for default configuration: %v", err)
+		}
+	}
+
+	{
+		payload := []byte(defaultConfig)
+		err := ioutil.WriteFile(target, payload, 0644)
+
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
