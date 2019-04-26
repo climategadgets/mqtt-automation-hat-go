@@ -8,6 +8,7 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 	"sync"
+	"sync/atomic"
 )
 
 func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_hat.AutomationHAT) {
@@ -18,8 +19,11 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 	var done sync.WaitGroup
 	done.Add(2)
 
-	// Zero or one goroutine will set this to true
-	parsed := false
+	// This will contain the number of successfully parsed messages. Default JSON parser is quite forgiving
+	// and may yield false positives, so it is a responsibility of each parser function to ensure they see
+	// the message they *really* expect. If more than one message is parsed successfully, it's a problem -
+	// we'll complain and ignore it.
+	parsed := uint32(0)
 
 	go func() {
 		defer done.Done()
@@ -33,7 +37,7 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 		}
 
 		log.Infof("switch: %v %v", message.Topic(), payload)
-		parsed = true
+		atomic.AddUint32(&parsed, 1)
 	}()
 
 	go func() {
@@ -48,13 +52,18 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 		}
 
 		log.Infof("sensor: %v %v", message.Topic(), payload)
-		parsed = true
+		atomic.AddUint32(&parsed, 1)
 	}()
 
 	done.Wait()
 	log.Debug("all parsers returned")
 
-	if !parsed {
+	if parsed == 0 {
 		log.Warn(fmt.Sprintf("no parsers were able to understand: %s", message.Payload()))
+		return
+	}
+
+	if parsed > 1 {
+		log.Error(fmt.Sprintf("ambiguous message, parsed %d times: %s", parsed, message.Payload()))
 	}
 }
