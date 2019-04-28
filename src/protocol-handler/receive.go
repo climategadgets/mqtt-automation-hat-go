@@ -25,27 +25,16 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 	// we'll complain and ignore it.
 	parsed := uint32(0)
 
-	go func() {
-		defer done.Done()
+	// Only one of these channels will eventually receive a parsed object
+	var cSensor chan hcc_shared.HccMessageSensor = make(chan hcc_shared.HccMessageSensor, 1)
+	var cSwitch chan hcc_shared.HccMessageSwitch = make(chan hcc_shared.HccMessageSwitch, 1)
+	var cZone chan hcc_shared.HccMessageZone = make(chan hcc_shared.HccMessageZone, 1)
 
-		var payload hcc_shared.HccMessageSwitch
-		err := json.Unmarshal(message.Payload(), &payload)
+	defer close(cSensor)
+	defer close(cSwitch)
+	defer close(cZone)
 
-		if err != nil {
-			log.Debug("not a switch: ", err)
-			return
-		}
-
-		if payload.State == nil {
-			log.Debug("not a switch: no state")
-			return
-		}
-
-		log.Infof("switch: %v = %v", message.Topic(), *payload.State)
-		atomic.AddUint32(&parsed, 1)
-	}()
-
-	go func() {
+	go func(c chan<- hcc_shared.HccMessageSensor) {
 		defer done.Done()
 
 		var payload hcc_shared.HccMessageSensor
@@ -61,11 +50,33 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 			return
 		}
 
-		log.Infof("sensor: %v = %v", message.Topic(), *payload.Signal)
+		log.Debugf("receive: sensor: %v = %v", message.Topic(), *payload.Signal)
+		c <- payload
 		atomic.AddUint32(&parsed, 1)
-	}()
+	}(cSensor)
 
-	go func() {
+	go func(c chan<- hcc_shared.HccMessageSwitch) {
+		defer done.Done()
+
+		var payload hcc_shared.HccMessageSwitch
+		err := json.Unmarshal(message.Payload(), &payload)
+
+		if err != nil {
+			log.Debug("not a switch: ", err)
+			return
+		}
+
+		if payload.State == nil {
+			log.Debug("not a switch: no state")
+			return
+		}
+
+		log.Debugf("receive: switch: %v = %v", message.Topic(), *payload.State)
+		c <- payload
+		atomic.AddUint32(&parsed, 1)
+	}(cSwitch)
+
+	go func(c chan<- hcc_shared.HccMessageZone) {
 		defer done.Done()
 
 		var payload hcc_shared.HccMessageZone
@@ -81,9 +92,10 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 			return
 		}
 
-		log.Infof("zone: %v = %v", message.Topic(), payload)
+		log.Debugf("receive: zone: %v = %v", message.Topic(), payload)
+		c <- payload
 		atomic.AddUint32(&parsed, 1)
-	}()
+	}(cZone)
 
 	done.Wait()
 	log.Debug("all parsers returned")
@@ -95,5 +107,27 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 
 	if parsed > 1 {
 		log.Error(fmt.Sprintf("ambiguous message, parsed %d times: %s", parsed, message.Payload()))
+		return
 	}
+
+	// We are only supposed to end up here if there was exactly one message parsed
+
+	select {
+	case <-cSensor:
+		// NOP for now
+		return
+
+	case m := <-cSwitch:
+		process(message.Topic(), m)
+		return
+
+	case <-cZone:
+		// NOP for now
+		return
+	}
+}
+
+func process(topic string, m hcc_shared.HccMessageSwitch) {
+
+	log.Infof(fmt.Sprintf("process: switch: %v = %v", topic, *m.State))
 }
