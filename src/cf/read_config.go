@@ -109,8 +109,8 @@ func createDefaultConfig(target string) {
 
 	_, err := os.Stat(cfDir)
 
-	if (os.IsNotExist(err)) {
-		err := os.Mkdir(cfDir, 0755);
+	if os.IsNotExist(err) {
+		err := os.Mkdir(cfDir, 0755)
 
 		if err != nil {
 			log.Fatalf("can't create directory for default configuration: %v", err)

@@ -30,32 +30,34 @@ type HccMessageSwitch struct {
 }
 
 type HvacMode int8
+
 const (
 	ModeCooling HvacMode = -1
-	ModeOff HvacMode = 0
+	ModeOff     HvacMode = 0
 	ModeHeating HvacMode = 1
 )
 
 type ZoneState string
+
 const (
-	ZoneError ZoneState = "ERROR"
-	ZoneOff ZoneState = "OFF"
+	ZoneError   ZoneState = "ERROR"
+	ZoneOff     ZoneState = "OFF"
 	ZoneCalling ZoneState = "CALLING"
-	ZoneHappy ZoneState = "HAPPY"
+	ZoneHappy   ZoneState = "HAPPY"
 )
 
 type HccMessageZone struct {
 	HccMessageBase
-	CurrentTemperature *float64 `json:currentTemperature`
-	DeviationEnabled bool `json:deviation.enabled`
-	DeviationSetpoint float64 `json:deviation.setpoint`
-	DeviationVoting bool `json:deviation.voting`
-	Enabled bool `json:enabled`
-	HvacMode `json:mode`
-	OnHold bool `json:onHold`
-	SetpointTemperature float64 `json:setpointTemperature`
-	State ZoneState `json:state`
+	CurrentTemperature  *float64 `json:currentTemperature`
+	DeviationEnabled    bool     `json:deviation.enabled`
+	DeviationSetpoint   float64  `json:deviation.setpoint`
+	DeviationVoting     bool     `json:deviation.voting`
+	Enabled             bool     `json:enabled`
+	HvacMode            `json:mode`
+	OnHold              bool      `json:onHold`
+	SetpointTemperature float64   `json:setpointTemperature`
+	State               ZoneState `json:state`
 	// Need this as a pointer to catch ambiguous JSON parser output
 	ThermostatSignal *float64 `json:thermostatSignal`
-	Voting bool `json:voting`
+	Voting           bool     `json:voting`
 }

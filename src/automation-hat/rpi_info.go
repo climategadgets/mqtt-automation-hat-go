@@ -1,8 +1,8 @@
 package automation_hat
 
 import (
-	"io/ioutil"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
 	"strings"
 )
 
@@ -26,12 +26,12 @@ func GetRaspberryPiRevision() *string {
 
 	lines := strings.Split(string(cpuinfo), "\n")
 
-	for _, line := range(lines) {
+	for _, line := range lines {
 
 		if strings.HasPrefix(line, fieldRevision) {
 			fields := strings.Fields(line)
 
-			log.Infof("Raspberry Pi: " + fieldRevision + ": %v", fields[2])
+			log.Infof("Raspberry Pi: "+fieldRevision+": %v", fields[2])
 			return &fields[2]
 		}
 	}
