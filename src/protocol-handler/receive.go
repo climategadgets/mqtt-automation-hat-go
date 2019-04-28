@@ -17,7 +17,7 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 	// Let's allow some redundancy and try parsing the payload for several types we know about in parallel,
 	// then discard the ones we don't care about (or the ones that simply didn't parse)
 	var done sync.WaitGroup
-	done.Add(2)
+	done.Add(3)
 
 	// This will contain the number of successfully parsed messages. Default JSON parser is quite forgiving
 	// and may yield false positives, so it is a responsibility of each parser function to ensure they see
@@ -62,6 +62,26 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 		}
 
 		log.Infof("sensor: %v = %v", message.Topic(), *payload.Signal)
+		atomic.AddUint32(&parsed, 1)
+	}()
+
+	go func() {
+		defer done.Done()
+
+		var payload hcc_shared.HccMessageZone
+		err := json.Unmarshal(message.Payload(), &payload)
+
+		if err != nil {
+			log.Debug("not a zone: ", err)
+			return
+		}
+
+		if payload.ThermostatSignal == nil {
+			log.Debug("not a zone: no thermostat signal")
+			return
+		}
+
+		log.Infof("zone: %v = %v", message.Topic(), payload)
 		atomic.AddUint32(&parsed, 1)
 	}()
 
