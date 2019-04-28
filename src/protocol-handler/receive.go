@@ -101,12 +101,12 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 	log.Debug("all parsers returned")
 
 	if parsed == 0 {
-		log.Warn(fmt.Sprintf("no parsers were able to understand: %s", message.Payload()))
+		log.Warn(fmt.Sprintf("no parsers were able to understand: %s = %s", message.Topic(), message.Payload()))
 		return
 	}
 
 	if parsed > 1 {
-		log.Error(fmt.Sprintf("ambiguous message, parsed %d times: %s", parsed, message.Payload()))
+		log.Error(fmt.Sprintf("ambiguous message, parsed %d times: %s = %s", parsed, message.Topic(), message.Payload()))
 		return
 	}
 
