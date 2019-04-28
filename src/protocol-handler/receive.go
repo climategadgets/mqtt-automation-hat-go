@@ -36,7 +36,12 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 			return
 		}
 
-		log.Infof("switch: %v %v", message.Topic(), payload)
+		if payload.State == nil {
+			log.Debug("not a switch: no state")
+			return
+		}
+
+		log.Infof("switch: %v = %v", message.Topic(), *payload.State)
 		atomic.AddUint32(&parsed, 1)
 	}()
 
@@ -51,7 +56,12 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 			return
 		}
 
-		log.Infof("sensor: %v %v", message.Topic(), payload)
+		if payload.Signal == nil {
+			log.Debug("not a sensor: no signal")
+			return
+		}
+
+		log.Infof("sensor: %v = %v", message.Topic(), *payload.Signal)
 		atomic.AddUint32(&parsed, 1)
 	}()
 

@@ -18,11 +18,11 @@ type HccMessageResponse struct {
 
 type HccMessageSensor struct {
 	HccMessageBase
-	Signal float64 `json:"signal"`
+	Signal *float64 `json:"signal"`
 }
 
 type HccMessageSwitch struct {
 	HccMessageBase
 	HccMessageUnique
-	State bool `json:"state"`
+	State *bool `json:"state"`
 }
