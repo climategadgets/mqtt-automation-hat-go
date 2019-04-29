@@ -8,6 +8,7 @@ import (
 	"github.com/climategadgets/mqtt-automation-hat-go/src/hcc-shared"
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
+	"strconv"
 	"sync"
 	"sync/atomic"
 )
@@ -145,8 +146,10 @@ func process(topic string, m hcc_shared.HccMessageSwitch, automationHat automati
 				state = *m.State
 			}
 
-			log.Infof("topic=%v, id=%v, inverted=%v", topic, switchId, switchConfig.Inverted)
-			log.Errorf("FIXME: Call AutomationHAT here: id=%v, state=%v", switchId, state)
+			log.Infof("topic=%v, id=%v, inverted=%v, state=%v", topic, switchId, switchConfig.Inverted, state)
+
+			switchOffset, _ := strconv.Atoi(switchId)
+			automationHat.Relay()[switchOffset].Set(state)
 
 			return
 		}
