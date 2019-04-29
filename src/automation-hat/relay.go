@@ -1,5 +1,7 @@
 package automation_hat
 
+import log "github.com/sirupsen/logrus"
+
 type relay struct {
 	state bool
 	pin   uint8
@@ -29,6 +31,7 @@ func (r *relay) Set(state bool) bool {
 	// VT: FIXME: Need to implement the state change, though
 	r.state = state
 
+	log.Infof("relay: pin=%v, ledNO=%v, ledNC=%v, state=%v, changed=%v", r.pin, r.ledNO, r.ledNC, state, changed)
 	return changed
 }
 
