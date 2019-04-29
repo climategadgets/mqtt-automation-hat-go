@@ -38,9 +38,9 @@ func main() {
 	log.Info("topic filter: " + topicFilter)
 	log.Info("configuration: " + *config)
 
-	switchMap := cf.ReadConfig(*config)
+	config := cf.ReadConfig(*config)
 	automationHat := automation_hat.GetAutomationHAT()
-	mqttClient := initMqttClient(target, topicFilter, automationHat, switchMap)
+	mqttClient := initMqttClient(target, topicFilter, automationHat, config)
 
 	installShutDownHandler(mqttClient, automationHat)
 
@@ -50,7 +50,7 @@ func main() {
 }
 
 // Create MQTT client and subscribe
-func initMqttClient(target string, topicFilter string, automationHat automation_hat.AutomationHAT, switchMap cf.ConfigHAT) mqtt.Client {
+func initMqttClient(target string, topicFilter string, automationHat automation_hat.AutomationHAT, config cf.ConfigHAT) mqtt.Client {
 
 	opts := mqtt.NewClientOptions().AddBroker(target).SetClientID("mqtt-automation-hat").SetCleanSession(true)
 
@@ -61,7 +61,7 @@ func initMqttClient(target string, topicFilter string, automationHat automation_
 	}
 
 	receive := func(client mqtt.Client, message mqtt.Message) {
-		protocol_handler.Receive(client, message, automationHat)
+		protocol_handler.Receive(client, message, automationHat, config)
 	}
 
 	if token := result.Subscribe(topicFilter, 2, receive); token.Wait() && token.Error() != nil {

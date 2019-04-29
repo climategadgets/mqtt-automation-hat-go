@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/climategadgets/mqtt-automation-hat-go/src/automation-hat"
+	"github.com/climategadgets/mqtt-automation-hat-go/src/cf"
 	"github.com/climategadgets/mqtt-automation-hat-go/src/hcc-shared"
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +12,7 @@ import (
 	"sync/atomic"
 )
 
-func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_hat.AutomationHAT) {
+func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_hat.AutomationHAT, config cf.ConfigHAT) {
 	log.Debug(fmt.Sprintf("%s %s", message.Topic(), message.Payload()))
 
 	// Let's allow some redundancy and try parsing the payload for several types we know about in parallel,
@@ -118,7 +119,7 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 		return
 
 	case m := <-cSwitch:
-		process(message.Topic(), m)
+		process(message.Topic(), m, automationHat, config)
 		return
 
 	case <-cZone:
@@ -127,7 +128,29 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 	}
 }
 
-func process(topic string, m hcc_shared.HccMessageSwitch) {
+func process(topic string, m hcc_shared.HccMessageSwitch, automationHat automation_hat.AutomationHAT, config cf.ConfigHAT) {
 
 	log.Infof(fmt.Sprintf("process: switch: %v = %v", topic, *m.State))
+
+	switchMap := config["switchMap"]
+	for switchId, switchConfig := range switchMap {
+
+		if switchConfig.Topic == topic {
+
+			var state bool
+
+			if switchConfig.Inverted {
+				state = !*m.State
+			} else {
+				state = *m.State
+			}
+
+			log.Infof("topic=%v, id=%v, inverted=%v", topic, switchId, switchConfig.Inverted)
+			log.Errorf("FIXME: Call AutomationHAT here: id=%v, state=%v", switchId, state)
+
+			return
+		}
+	}
+
+	log.Warnf("no matching topic in the config: %v", topic)
 }
