@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-type automationHat struct {
+type automationHatBase struct {
 	adc24  [3]ADC24
 	input  [3]Input
 	output [3]Output
@@ -19,6 +19,14 @@ type statusLights struct {
 	power Light
 	comms Light
 	warn  Light
+}
+
+type automationHatFake struct {
+	automationHatBase
+}
+
+type automationHatPi struct {
+	automationHatBase
 }
 
 type hatLocker struct {
@@ -48,15 +56,31 @@ func GetAutomationHAT() AutomationHAT {
 }
 
 func newAutomationFake() AutomationHAT {
-	log.Warn("FIXME: returning actual HAT instead of the fake")
-	return newAutomationHAT()
+	log.Warn("using AutomationHAT fake")
+	hat := automationHatBase{}
+
+	initialize(&hat)
+
+	return automationHatFake{hat}
 }
 
 func newAutomationHAT() AutomationHAT {
 
 	log.Info("creating new instance of AutomationHAT")
 
-	hat := automationHat{}
+	hat := automationHatBase{}
+
+	initialize(&hat)
+
+	// VT: NOTE: We can safely assume that since someone's created an instance,
+	// they're going to use it
+
+	rpio.Open()
+
+	return automationHatPi{hat}
+}
+
+func initialize(hat *automationHatBase) {
 
 	// Pinout: https://pinout.xyz/pinout/automation_hat#
 
@@ -82,41 +106,39 @@ func newAutomationHAT() AutomationHAT {
 	hat.adc33 = GetADC33(3, 3.3)
 
 	hat.status = statusLights{power: GetLED(17), comms: GetLED(16), warn: GetLED(15)}
-
-	// VT: NOTE: We can safely assume that since someone's created an instance,
-	// they're going to use it
-
-	rpio.Open()
-
-	return hat
 }
 
-func (hat automationHat) Close() error {
+func (hat automationHatFake) Close() error {
+
+	return nil
+}
+
+func (hat automationHatPi) Close() error {
 
 	return rpio.Close()
 }
 
-func (hat automationHat) Relay() [3]Relay {
+func (hat automationHatBase) Relay() [3]Relay {
 	return hat.relay
 }
 
-func (hat automationHat) ADC24() [3]ADC24 {
+func (hat automationHatBase) ADC24() [3]ADC24 {
 	return hat.adc24
 }
 
-func (hat automationHat) Input() [3]Input {
+func (hat automationHatBase) Input() [3]Input {
 	return hat.input
 }
 
-func (hat automationHat) Output() [3]Output {
+func (hat automationHatBase) Output() [3]Output {
 	return hat.output
 }
 
-func (hat automationHat) ADC33() ADC33 {
+func (hat automationHatBase) ADC33() ADC33 {
 	return hat.adc33
 }
 
-func (hat automationHat) StatusLights() StatusLights {
+func (hat automationHatBase) StatusLights() StatusLights {
 	return hat.status
 }
 
