@@ -56,9 +56,9 @@ func GetAutomationHAT() AutomationHAT {
 }
 
 func newAutomationFake() AutomationHAT {
+
 	log.Warn("using AutomationHAT fake")
 	hat := automationHatBase{}
-
 	initialize(&hat)
 
 	return automationHatFake{hat}
@@ -67,9 +67,7 @@ func newAutomationFake() AutomationHAT {
 func newAutomationHAT() AutomationHAT {
 
 	log.Info("creating new instance of AutomationHAT")
-
 	hat := automationHatBase{}
-
 	initialize(&hat)
 
 	// VT: NOTE: We can safely assume that since someone's created an instance,
@@ -109,12 +107,10 @@ func initialize(hat *automationHatBase) {
 }
 
 func (hat automationHatFake) Close() error {
-
 	return nil
 }
 
 func (hat automationHatPi) Close() error {
-
 	return rpio.Close()
 }
 
