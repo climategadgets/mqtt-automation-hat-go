@@ -10,6 +10,7 @@ import (
 	"github.com/climategadgets/mqtt-automation-hat-go/src/protocol-handler"
 	"github.com/eclipse/paho.mqtt.golang"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"os"
 	"os/signal"
 	"sync"
@@ -30,7 +31,9 @@ func main() {
 	var logger *zap.Logger
 
 	if *debug {
-		logger, _ = zap.NewDevelopment()
+		config := zap.NewDevelopmentConfig()
+		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		logger, _ = config.Build()
 	} else {
 		logger, _ = zap.NewProduction()
 	}
