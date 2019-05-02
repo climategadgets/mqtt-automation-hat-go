@@ -1,8 +1,8 @@
 package automation_hat
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/stianeikeland/go-rpio"
+	"go.uber.org/zap"
 	"sync"
 )
 
@@ -57,7 +57,7 @@ func GetAutomationHAT() AutomationHAT {
 
 func newAutomationFake() AutomationHAT {
 
-	log.Warn("using AutomationHAT fake")
+	zap.S().Warn("using AutomationHAT fake")
 	hat := automationHatBase{}
 	initialize(&hat)
 
@@ -66,7 +66,7 @@ func newAutomationFake() AutomationHAT {
 
 func newAutomationHAT() AutomationHAT {
 
-	log.Info("creating new instance of AutomationHAT")
+	zap.S().Info("creating new instance of AutomationHAT")
 	hat := automationHatBase{}
 	initialize(&hat)
 
