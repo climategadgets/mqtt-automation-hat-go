@@ -9,7 +9,7 @@ import (
 // VT: NOTE: Benchmarks show that the time spent on the operation doesn't depend as much on whether it passes or fails,
 // but rather roughly on source JSON size. Still, there's a small overhead for a failed operation.
 
-var switchJson string = "{\"timestamp\":1547614624328,\"name\":\"mode switch\",\"signature\":\"mode switch\",\"signal\":false}"
+var switchJson string = "{\"timestamp\":1547614624328,\"name\":\"mode switch\",\"signature\":\"mode switch\",\"state\":false,\"id\":\"af0c0e5802d625aaaddddb14ea7a8731\"}"
 var sensorJson string = "{\"timestamp\":1548739962980,\"name\":\"Back Wall\",\"signature\":\"4e4b070508820f5913f\",\"mode\":\"Cooling\",\"state\":\"HAPPY\",\"thermostatSignal\":-7.5,\"currentTemperature\":21.5,\"setpointTemperature\":30.0,\"enabled\":true,\"onHold\":false,\"voting\":true,\"deviation.setpoint\":0.0,\"deviation.enabled\":false,\"deviation.voting\":false}"
 
 func BenchmarkParserSwitchPass(b *testing.B) {
