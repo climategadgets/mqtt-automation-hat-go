@@ -59,3 +59,19 @@ func BenchmarkParserSpeedFromSeed(b *testing.B) {
 		parseFromSeed([]byte(switchJson), "test-topic")
 	}
 }
+
+func BenchmarkParserSpeedEntity(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		var payload hcc_shared.HccMessageEntity
+		json.Unmarshal([]byte(sensorJson), &payload)
+	}
+}
+
+func BenchmarkParserSpeedZone(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		var payload hcc_shared.HccMessageSensor
+		json.Unmarshal([]byte(sensorJson), &payload)
+	}
+}
