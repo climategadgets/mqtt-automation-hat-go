@@ -113,10 +113,7 @@ func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat
 
 				now := time.Now()
 
-				// VT: FIXME: Commented out until the protocol handler is finished - blows up
-				// on i386
-				// automationHat.Close()
-				zap.S().Error("FIXME: AutomationHat.Close() disabled")
+				automationHat.Close()
 
 				duration := time.Since(now)
 
