@@ -64,6 +64,7 @@ func parseGuess(source []byte, topic string) interface{} {
 
 	return nil
 }
+
 // Parse a sensor JSON message.
 // First argument is the payload to parse, second is the topic name (for debugging purposes only)
 func parseSensor(source []byte, topic string) interface{} {
