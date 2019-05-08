@@ -67,6 +67,19 @@ func newAutomationFake() AutomationHAT {
 	hat := automationHatBase{}
 	initialize(&hat)
 
+	go func(control <-chan interface{}) {
+
+		for {
+			select {
+			case m := <-control:
+				// VT: NOTE: This is all we do here in the fake, log.
+				// VT: FIXME: Errorf so it is visible in the log
+				zap.S().Errorf("control/fake: %v", m)
+			}
+		}
+
+	}(hat.control)
+
 	return automationHatFake{hat}
 }
 
@@ -81,11 +94,26 @@ func newAutomationHAT() AutomationHAT {
 
 	rpio.Open()
 
+	go func(control <-chan interface{}) {
+
+		for {
+			select {
+			case m := <-control:
+				// VT: FIXME: Errorf so it is visible in the log
+				zap.S().Errorf("control/rpio: %v", m)
+
+				// VT: FIXME: Pass it down to rpio right here
+			}
+		}
+
+	}(hat.control)
+
 	return automationHatPi{hat}
 }
 
 func initialize(hat *automationHatBase) {
 
+	// VT: FIXME: Where do I close this channel? Do I need to bother if it is once in a lifetime?
 	var control chan interface{} = make(chan interface{})
 	hat.control = control
 
