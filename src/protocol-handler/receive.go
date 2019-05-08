@@ -132,14 +132,14 @@ func parseParallel(source []byte, topic string) interface{} {
 // First argument is the payload to parse, second is the topic name (for debugging purposes only)
 func parseFromSeed(source []byte, topic string) interface{} {
 
-	var base hcc_shared.HccMessageBase
-	err := json.Unmarshal(source, &base)
+	var entity hcc_shared.HccMessageEntity
+	err := json.Unmarshal(source, &entity)
 
 	if err != nil {
-		zap.S().Warnf("can't parse even as a base: %v", base)
+		zap.S().Warnf("can't parse even as a entity: %v", entity)
 	}
 
-	switch base.Type {
+	switch entity.Type {
 
 	case hcc_shared.TypeSensor:
 		return parseSensor(source, topic)
@@ -148,7 +148,7 @@ func parseFromSeed(source []byte, topic string) interface{} {
 	case hcc_shared.TypeZone:
 		return parseZone(source, topic)
 	default:
-		zap.S().Warnf("unknown base type: '%v', entityType missing from JSON? %s", base.Type, string(source))
+		zap.S().Warnf("unknown entity type: '%v', entityType missing from JSON? %s", entity.Type, string(source))
 		return nil
 	}
 }

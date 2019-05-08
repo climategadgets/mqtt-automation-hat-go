@@ -10,8 +10,12 @@ const (
 	TypeZone EntityType = "thermostat"
 )
 
-type HccMessageBase struct {
+type HccMessageEntity struct {
 	Type      EntityType `json:"entityType""`
+}
+
+type HccMessageBase struct {
+	HccMessageEntity
 	Timestamp uint64     `json:"timestamp"`
 	Name      string     `json:"name"`
 	Signature string     `json:"signature"`
