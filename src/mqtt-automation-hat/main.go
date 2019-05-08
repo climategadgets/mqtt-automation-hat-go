@@ -9,7 +9,8 @@ import (
 	"github.com/climategadgets/mqtt-automation-hat-go/src/cf"
 	"github.com/climategadgets/mqtt-automation-hat-go/src/protocol-handler"
 	"github.com/eclipse/paho.mqtt.golang"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"os"
 	"os/signal"
 	"sync"
@@ -27,16 +28,24 @@ var (
 func main() {
 	flag.Parse()
 
+	var logger *zap.Logger
+
 	if *debug {
-		log.SetLevel(log.DebugLevel)
+		config := zap.NewDevelopmentConfig()
+		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		logger, _ = config.Build()
+	} else {
+		logger, _ = zap.NewProduction()
 	}
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
 
 	target := fmt.Sprintf("tcp://%s:%d", *brokerHost, *brokerPort)
 	topicFilter := fmt.Sprintf("%s/#", *rootTopic)
 
-	log.Info("connecting to broker: " + target)
-	log.Info("topic filter: " + topicFilter)
-	log.Info("configuration: " + *config)
+	zap.S().Infof("connecting to broker: %v", target)
+	zap.S().Infof("topic filter: %v", topicFilter)
+	zap.S().Infof("configuration: %v", *config)
 
 	config := cf.ReadConfig(*config)
 	automationHat := automation_hat.GetAutomationHAT()
@@ -78,7 +87,7 @@ func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat
 
 	go func() {
 		for sig := range sig {
-			log.Infof("captured %v signal, shutting down", sig)
+			zap.S().Infof("captured %v signal, shutting down", sig)
 
 			var done sync.WaitGroup
 			done.Add(2)
@@ -95,7 +104,7 @@ func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat
 
 				duration := time.Since(now)
 
-				log.Infof("MQTT disconnected in %v", duration)
+				zap.S().Infof("MQTT disconnected in %v", duration)
 			}()
 
 			// Shut down the Automation HAT
@@ -107,19 +116,19 @@ func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat
 				// VT: FIXME: Commented out until the protocol handler is finished - blows up
 				// on i386
 				// automationHat.Close()
-				log.Error("FIXME: AutomationHat.Close() disabled")
+				zap.S().Error("FIXME: AutomationHat.Close() disabled")
 
 				duration := time.Since(now)
 
-				log.Infof("AutomationHAT shut down in %v", duration)
+				zap.S().Infof("AutomationHAT shut down in %v", duration)
 			}()
 
 			done.Wait()
 			duration := time.Since(now)
 
-			log.Infof("shut down in %v", duration)
+			zap.S().Infof("shut down in %v", duration)
 
-			log.Infof("bye")
+			zap.S().Infof("bye")
 			os.Exit(0)
 		}
 	}()

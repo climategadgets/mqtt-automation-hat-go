@@ -1,7 +1,7 @@
 package automation_hat
 
 import (
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"strings"
 )
@@ -19,8 +19,8 @@ func GetRaspberryPiRevision() *string {
 	cpuinfo, err := ioutil.ReadFile(procCpuinfo)
 
 	if err != nil {
-		log.Warn(err)
-		log.Warn("no " + procCpuinfo + ", likely not running on Pi (nor on UNIX)")
+		zap.S().Warn(err)
+		zap.S().Warn("no " + procCpuinfo + ", likely not running on Pi (nor on UNIX)")
 		return nil
 	}
 
@@ -31,11 +31,11 @@ func GetRaspberryPiRevision() *string {
 		if strings.HasPrefix(line, fieldRevision) {
 			fields := strings.Fields(line)
 
-			log.Infof("Raspberry Pi: "+fieldRevision+": %v", fields[2])
+			zap.S().Infof("Raspberry Pi: "+fieldRevision+": %v", fields[2])
 			return &fields[2]
 		}
 	}
 
-	log.Warn("no " + fieldRevision + " line in " + procCpuinfo + ", likely not running on Pi")
+	zap.S().Warn("no " + fieldRevision + " line in " + procCpuinfo + ", likely not running on Pi")
 	return nil
 }

@@ -2,7 +2,20 @@
 // all incoming and outgoing communications between HCC and the outside world
 package hcc_shared
 
+type EntityType string
+
+const (
+	TypeSensor EntityType = "sensor"
+	TypeSwitch EntityType = "switch"
+	TypeZone   EntityType = "thermostat"
+)
+
+type HccMessageEntity struct {
+	Type EntityType `json:"entityType"`
+}
+
 type HccMessageBase struct {
+	HccMessageEntity
 	Timestamp uint64 `json:"timestamp"`
 	Name      string `json:"name"`
 	Signature string `json:"signature"`

@@ -2,7 +2,7 @@ package cf
 
 import (
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -24,7 +24,7 @@ func getDefaultConfigDir() string {
 	usr, err := user.Current()
 
 	if err != nil {
-		log.Fatal(err)
+		zap.S().Fatal(err)
 	}
 
 	return usr.HomeDir + string(os.PathSeparator) + defaultCfDir
@@ -55,13 +55,13 @@ func readConfig(source string, again bool) ConfigHAT {
 		if source == defaultCf {
 
 			if again {
-				log.Fatal("looks like we failed to create default config, terminating")
+				zap.S().Fatal("looks like we failed to create default config, terminating")
 			}
 
 			// VT: FIXME: Let's assume the file doesn't exist
-			log.Warnf("default configuration location (" + defaultCf + ") specified, but the file can't be read")
-			log.Warn("we'll try to create a default configuration there,")
-			log.Warn("see https://github.com/climategadgets/mqtt-automation-hat-go/wiki/Configuration-File for details")
+			zap.S().Warnf("default configuration location (" + defaultCf + ") specified, but the file can't be read")
+			zap.S().Warn("we'll try to create a default configuration there,")
+			zap.S().Warn("see https://github.com/climategadgets/mqtt-automation-hat-go/wiki/Configuration-File for details")
 
 			createDefaultConfig(defaultCf)
 			return readConfig(source, true)
@@ -71,17 +71,17 @@ func readConfig(source string, again bool) ConfigHAT {
 	buffer, err1 := ioutil.ReadAll(jsonFile)
 
 	if err1 != nil {
-		log.Fatalf("couldn't read configuration from "+source+", %v", err1)
+		zap.S().Fatalf("couldn't read configuration from "+source+", %v", err1)
 	}
 
 	result := make(ConfigHAT)
 	err2 := json.Unmarshal(buffer, &result)
 
 	if err2 != nil {
-		log.Fatalf("couldn't read configuration from "+source+", %v", err2)
+		zap.S().Fatalf("couldn't read configuration from "+source+", %v", err2)
 	}
 
-	log.Infof("configuration: %v", result)
+	zap.S().Infof("configuration: %v", result)
 
 	return result
 }
@@ -113,7 +113,7 @@ func createDefaultConfig(target string) {
 		err := os.Mkdir(cfDir, 0755)
 
 		if err != nil {
-			log.Fatalf("can't create directory for default configuration: %v", err)
+			zap.S().Fatalf("can't create directory for default configuration: %v", err)
 		}
 	}
 
@@ -122,7 +122,7 @@ func createDefaultConfig(target string) {
 		err := ioutil.WriteFile(target, payload, 0644)
 
 		if err != nil {
-			log.Fatal(err)
+			zap.S().Fatal(err)
 		}
 	}
 }

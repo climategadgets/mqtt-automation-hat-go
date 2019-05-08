@@ -7,131 +7,159 @@ import (
 	"github.com/climategadgets/mqtt-automation-hat-go/src/cf"
 	"github.com/climategadgets/mqtt-automation-hat-go/src/hcc-shared"
 	"github.com/eclipse/paho.mqtt.golang"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"strconv"
-	"sync"
-	"sync/atomic"
+	"strings"
 )
 
-func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_hat.AutomationHAT, config cf.ConfigHAT) {
-	log.Debug(fmt.Sprintf("%s %s", message.Topic(), message.Payload()))
+// Parse a JSON message.
+// First argument is the payload to parse, second is the topic name
+func parse(source []byte, topic string) interface{} {
 
-	// Let's allow some redundancy and try parsing the payload for several types we know about in parallel,
-	// then discard the ones we don't care about (or the ones that simply didn't parse)
-	var done sync.WaitGroup
-	done.Add(3)
+	guessed := parseGuess(source, topic)
 
-	// This will contain the number of successfully parsed messages. Default JSON parser is quite forgiving
-	// and may yield false positives, so it is a responsibility of each parser function to ensure they see
-	// the message they *really* expect. If more than one message is parsed successfully, it's a problem -
-	// we'll complain and ignore it.
-	parsed := uint32(0)
-
-	// Only one of these channels will eventually receive a parsed object
-	var cSensor chan hcc_shared.HccMessageSensor = make(chan hcc_shared.HccMessageSensor, 1)
-	var cSwitch chan hcc_shared.HccMessageSwitch = make(chan hcc_shared.HccMessageSwitch, 1)
-	var cZone chan hcc_shared.HccMessageZone = make(chan hcc_shared.HccMessageZone, 1)
-
-	defer close(cSensor)
-	defer close(cSwitch)
-	defer close(cZone)
-
-	go func(c chan<- hcc_shared.HccMessageSensor) {
-		defer done.Done()
-
-		var payload hcc_shared.HccMessageSensor
-		err := json.Unmarshal(message.Payload(), &payload)
-
-		if err != nil {
-			log.Debug("not a sensor: ", err)
-			return
-		}
-
-		if payload.Signal == nil {
-			log.Debug("not a sensor: no signal")
-			return
-		}
-
-		log.Debugf("receive: sensor: %v = %v", message.Topic(), *payload.Signal)
-		c <- payload
-		atomic.AddUint32(&parsed, 1)
-	}(cSensor)
-
-	go func(c chan<- hcc_shared.HccMessageSwitch) {
-		defer done.Done()
-
-		var payload hcc_shared.HccMessageSwitch
-		err := json.Unmarshal(message.Payload(), &payload)
-
-		if err != nil {
-			log.Debug("not a switch: ", err)
-			return
-		}
-
-		if payload.State == nil {
-			log.Debug("not a switch: no state")
-			return
-		}
-
-		log.Debugf("receive: switch: %v = %v", message.Topic(), *payload.State)
-		c <- payload
-		atomic.AddUint32(&parsed, 1)
-	}(cSwitch)
-
-	go func(c chan<- hcc_shared.HccMessageZone) {
-		defer done.Done()
-
-		var payload hcc_shared.HccMessageZone
-		err := json.Unmarshal(message.Payload(), &payload)
-
-		if err != nil {
-			log.Debug("not a zone: ", err)
-			return
-		}
-
-		if payload.ThermostatSignal == nil {
-			log.Debug("not a zone: no thermostat signal")
-			return
-		}
-
-		log.Debugf("receive: zone: %v = %v", message.Topic(), payload)
-		c <- payload
-		atomic.AddUint32(&parsed, 1)
-	}(cZone)
-
-	done.Wait()
-	log.Debug("all parsers returned")
-
-	if parsed == 0 {
-		log.Warn(fmt.Sprintf("no parsers were able to understand: %s = %s", message.Topic(), message.Payload()))
-		return
+	if guessed != nil {
+		return guessed
 	}
 
-	if parsed > 1 {
-		log.Error(fmt.Sprintf("ambiguous message, parsed %d times: %s = %s", parsed, message.Topic(), message.Payload()))
-		return
+	var entity hcc_shared.HccMessageEntity
+	err := json.Unmarshal(source, &entity)
+
+	if err != nil {
+		zap.S().Warnf("can't parse even as a entity: %v", entity)
 	}
 
-	// We are only supposed to end up here if there was exactly one message parsed
+	switch entity.Type {
 
-	select {
-	case <-cSensor:
-		// NOP for now
-		return
-
-	case m := <-cSwitch:
-		process(message.Topic(), m, automationHat, config)
-		return
-
-	case <-cZone:
-		// NOP for now
-		return
+	case hcc_shared.TypeSensor:
+		return parseSensor(source, topic)
+	case hcc_shared.TypeSwitch:
+		return parseSwitch(source, topic)
+	case hcc_shared.TypeZone:
+		return parseZone(source, topic)
+	default:
+		zap.S().Warnf("unknown entity type: '%v', entityType missing from JSON? %s", entity.Type, string(source))
+		return nil
 	}
 }
 
-func process(topic string, m hcc_shared.HccMessageSwitch, automationHat automation_hat.AutomationHAT, config cf.ConfigHAT) {
+// Parse a JSON message.
+// First argument is the payload to parse, second is the topic name
+func parseGuess(source []byte, topic string) interface{} {
 
-	log.Infof(fmt.Sprintf("process: switch: %v = %v", topic, *m.State))
+	if strings.Contains(topic, string(hcc_shared.TypeSensor)) {
+		zap.S().Debugf("guessing this is a sensor: %s", topic)
+		return parseSensor(source, topic)
+	}
+
+	if strings.Contains(topic, string(hcc_shared.TypeSwitch)) {
+		zap.S().Debugf("guessing this is a switch: %s", topic)
+		return parseSwitch(source, topic)
+	}
+
+	if strings.Contains(topic, string(hcc_shared.TypeZone)) {
+		zap.S().Debugf("guessing this is a zone: %s", topic)
+		return parseZone(source, topic)
+	}
+
+	return nil
+}
+
+// Parse a sensor JSON message.
+// First argument is the payload to parse, second is the topic name (for debugging purposes only)
+func parseSensor(source []byte, topic string) interface{} {
+
+	var payload hcc_shared.HccMessageSensor
+	err := json.Unmarshal(source, &payload)
+
+	if err != nil {
+		zap.S().Errorf("malformed sensor (%v): %v", err, source)
+		return nil
+	}
+
+	if payload.Signal == nil {
+		zap.S().Error("not a sensor (no signal): %v", source)
+		return nil
+	}
+
+	zap.S().Debugf("receive: sensor: %v = %v", topic, *payload.Signal)
+	return payload
+}
+
+// Parse a switch JSON message.
+// First argument is the payload to parse, second is the topic name (for debugging purposes only)
+func parseSwitch(source []byte, topic string) interface{} {
+
+	var payload hcc_shared.HccMessageSwitch
+	err := json.Unmarshal(source, &payload)
+
+	if err != nil {
+		zap.S().Errorf("malformed switch (%v): %v", err, source)
+		return nil
+	}
+
+	if payload.State == nil {
+		zap.S().Error("not a switch (no state): %v", source)
+		return nil
+	}
+
+	zap.S().Debugf("receive: switch: %v = %v", topic, *payload.State)
+	return payload
+}
+
+// Parse a zone JSON message.
+// First argument is the payload to parse, second is the topic name (for debugging purposes only)
+func parseZone(source []byte, topic string) interface{} {
+
+	var payload hcc_shared.HccMessageZone
+	err := json.Unmarshal(source, &payload)
+
+	if err != nil {
+		zap.S().Errorf("malformed zone (%v): %v", err, source)
+		return nil
+	}
+
+	if payload.ThermostatSignal == nil {
+		zap.S().Debug("not a zone: no thermostat signal")
+		return nil
+	}
+
+	zap.S().Debugf("receive: zone: %v = %v", topic, payload)
+	return payload
+}
+
+// Receive an MQTT message.
+func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_hat.AutomationHAT, config cf.ConfigHAT) {
+	zap.S().Debugf("%s %s", message.Topic(), message.Payload())
+
+	command := parse(message.Payload(), message.Topic())
+
+	if command == nil {
+		// Nothing parsed
+		return
+	}
+
+	switch c := command.(type) {
+
+	case hcc_shared.HccMessageSensor:
+		zap.S().Infof("sensor: %v", c)
+		// VT: FIXME: Implement this
+
+	case hcc_shared.HccMessageSwitch:
+		processSwitch(message.Topic(), c, automationHat, config)
+
+	case hcc_shared.HccMessageZone:
+		zap.S().Infof("zone: %v", c)
+		// VT: FIXME: Implement this
+
+	default:
+		panic(fmt.Sprintf("unknown type: %v", c))
+	}
+}
+
+func processSwitch(topic string, m hcc_shared.HccMessageSwitch, automationHat automation_hat.AutomationHAT, config cf.ConfigHAT) {
+
+	zap.S().Infof(fmt.Sprintf("process: switch: %v = %v", topic, *m.State))
 
 	switchMap := config["switchMap"]
 	for switchId, switchConfig := range switchMap {
@@ -146,7 +174,7 @@ func process(topic string, m hcc_shared.HccMessageSwitch, automationHat automati
 				state = *m.State
 			}
 
-			log.Infof("topic=%v, id=%v, inverted=%v, state=%v", topic, switchId, switchConfig.Inverted, state)
+			zap.S().Infof("topic=%v, id=%v, inverted=%v, state=%v", topic, switchId, switchConfig.Inverted, state)
 
 			switchOffset, _ := strconv.Atoi(switchId)
 			automationHat.Relay()[switchOffset].Set(state)
@@ -155,5 +183,5 @@ func process(topic string, m hcc_shared.HccMessageSwitch, automationHat automati
 		}
 	}
 
-	log.Warnf("no matching topic in the config: %v", topic)
+	zap.S().Warnf("no matching topic in the config: %v", topic)
 }
