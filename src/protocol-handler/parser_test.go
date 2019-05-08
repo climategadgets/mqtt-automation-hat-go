@@ -44,19 +44,11 @@ func BenchmarkParserSensorFail(b *testing.B) {
 	}
 }
 
-func BenchmarkParserSpeedParallel(b *testing.B) {
-
-	for i := 0; i < b.N; i++ {
-		parseParallel([]byte(sensorJson), "test-topic")
-		parseParallel([]byte(switchJson), "test-topic")
-	}
-}
-
 func BenchmarkParserSpeedFromSeed(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
-		parseFromSeed([]byte(sensorJson), "test-topic")
-		parseFromSeed([]byte(switchJson), "test-topic")
+		parse([]byte(sensorJson), "test-topic")
+		parse([]byte(switchJson), "test-topic")
 	}
 }
 
