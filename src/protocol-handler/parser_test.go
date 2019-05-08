@@ -43,3 +43,11 @@ func BenchmarkParserSensorFail(b *testing.B) {
 		json.Unmarshal([]byte(switchJson), &payload)
 	}
 }
+
+func BenchmarkParserSpeedParallel(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		parse([]byte(sensorJson), "test-topic")
+		parse([]byte(switchJson), "test-topic")
+	}
+}
