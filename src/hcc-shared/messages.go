@@ -5,20 +5,20 @@ package hcc_shared
 type EntityType string
 
 const (
-	TypeSensor   EntityType = "sensor"
-	TypeSwitch     EntityType = "switch"
-	TypeZone EntityType = "thermostat"
+	TypeSensor EntityType = "sensor"
+	TypeSwitch EntityType = "switch"
+	TypeZone   EntityType = "thermostat"
 )
 
 type HccMessageEntity struct {
-	Type      EntityType `json:"entityType""`
+	Type EntityType `json:"entityType""`
 }
 
 type HccMessageBase struct {
 	HccMessageEntity
-	Timestamp uint64     `json:"timestamp"`
-	Name      string     `json:"name"`
-	Signature string     `json:"signature"`
+	Timestamp uint64 `json:"timestamp"`
+	Name      string `json:"name"`
+	Signature string `json:"signature"`
 }
 
 type HccMessageUnique struct {
