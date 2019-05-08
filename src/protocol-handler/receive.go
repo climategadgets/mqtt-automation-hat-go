@@ -15,7 +15,7 @@ import (
 
 // Parse a JSON message.
 // First argument is the payload to parse, second is the topic name (for debugging purposes only)
-func parse(source []byte, topic string) interface{} {
+func parseParallel(source []byte, topic string) interface{} {
 
 	// Let's allow some redundancy and try parsing the payload for several types we know about in parallel,
 	// then discard the ones we don't care about (or the ones that simply didn't parse)
@@ -128,11 +128,99 @@ func parse(source []byte, topic string) interface{} {
 	}
 }
 
+// Parse a JSON message.
+// First argument is the payload to parse, second is the topic name (for debugging purposes only)
+func parseFromSeed(source []byte, topic string) interface{} {
+
+	var base hcc_shared.HccMessageBase
+	err := json.Unmarshal(source, &base)
+
+	if err != nil {
+		zap.S().Warnf("can't parse even as a base: %v", base)
+	}
+
+	switch base.Type {
+
+	case hcc_shared.TypeSensor:
+		return parseSensor(source, topic)
+	case hcc_shared.TypeSwitch:
+		return parseSwitch(source, topic)
+	case hcc_shared.TypeZone:
+		return parseZone(source, topic)
+	default:
+		zap.S().Warnf("unknown base type: '%v', entityType missing from JSON? %s", base.Type, string(source))
+		return nil
+	}
+}
+
+// Parse a sensor JSON message.
+// First argument is the payload to parse, second is the topic name (for debugging purposes only)
+func parseSensor(source []byte, topic string) interface{} {
+
+	var payload hcc_shared.HccMessageSensor
+	err := json.Unmarshal(source, &payload)
+
+	if err != nil {
+		zap.S().Errorf("malformed sensor (%v): %v", err, source)
+		return nil
+	}
+
+	if payload.Signal == nil {
+		zap.S().Error("not a sensor (no signal): %v", source)
+		return nil
+	}
+
+	zap.S().Debugf("receive: sensor: %v = %v", topic, *payload.Signal)
+	return payload
+}
+
+// Parse a switch JSON message.
+// First argument is the payload to parse, second is the topic name (for debugging purposes only)
+func parseSwitch(source []byte, topic string) interface{} {
+
+	var payload hcc_shared.HccMessageSwitch
+	err := json.Unmarshal(source, &payload)
+
+	if err != nil {
+		zap.S().Errorf("malformed switch (%v): %v", err, source)
+		return nil
+	}
+
+	if payload.State == nil {
+		zap.S().Error("not a switch (no state): %v", source)
+		return nil
+	}
+
+	zap.S().Debugf("receive: switch: %v = %v", topic, *payload.State)
+	return payload
+}
+
+// Parse a zone JSON message.
+// First argument is the payload to parse, second is the topic name (for debugging purposes only)
+func parseZone(source []byte, topic string) interface{} {
+
+	var payload hcc_shared.HccMessageZone
+	err := json.Unmarshal(source, &payload)
+
+	if err != nil {
+		zap.S().Errorf("malformed zone (%v): %v", err, source)
+		return nil
+	}
+
+	if payload.ThermostatSignal == nil {
+		zap.S().Debug("not a zone: no thermostat signal")
+		return nil
+	}
+
+	zap.S().Debugf("receive: zone: %v = %v", topic, payload)
+	return payload
+}
+
 // Receive an MQTT message.
 func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_hat.AutomationHAT, config cf.ConfigHAT) {
 	zap.S().Debugf("%s %s", message.Topic(), message.Payload())
 
-	command := parse(message.Payload(), message.Topic())
+	command := parseFromSeed(message.Payload(), message.Topic())
 
 	if command == nil {
 		// Nothing parsed
