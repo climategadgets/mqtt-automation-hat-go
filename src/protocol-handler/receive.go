@@ -9,11 +9,18 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 	"go.uber.org/zap"
 	"strconv"
+	"strings"
 )
 
 // Parse a JSON message.
-// First argument is the payload to parse, second is the topic name (for debugging purposes only)
+// First argument is the payload to parse, second is the topic name
 func parse(source []byte, topic string) interface{} {
+
+	guessed := parseGuess(source, topic)
+
+	if guessed != nil {
+		return guessed
+	}
 
 	var entity hcc_shared.HccMessageEntity
 	err := json.Unmarshal(source, &entity)
@@ -36,6 +43,27 @@ func parse(source []byte, topic string) interface{} {
 	}
 }
 
+// Parse a JSON message.
+// First argument is the payload to parse, second is the topic name
+func parseGuess(source []byte, topic string) interface{} {
+
+	if strings.Contains(topic, string(hcc_shared.TypeSensor)) {
+		zap.S().Debugf("guessing this is a sensor: %s", topic)
+		return parseSensor(source, topic)
+	}
+
+	if strings.Contains(topic, string(hcc_shared.TypeSwitch)) {
+		zap.S().Debugf("guessing this is a switch: %s", topic)
+		return parseSwitch(source, topic)
+	}
+
+	if strings.Contains(topic, string(hcc_shared.TypeZone)) {
+		zap.S().Debugf("guessing this is a zone: %s", topic)
+		return parseZone(source, topic)
+	}
+
+	return nil
+}
 // Parse a sensor JSON message.
 // First argument is the payload to parse, second is the topic name (for debugging purposes only)
 func parseSensor(source []byte, topic string) interface{} {

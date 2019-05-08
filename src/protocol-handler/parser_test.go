@@ -47,8 +47,17 @@ func BenchmarkParserSensorFail(b *testing.B) {
 func BenchmarkParserSpeedFromSeed(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
-		parse([]byte(sensorJson), "test-topic")
-		parse([]byte(switchJson), "test-topic")
+		// VT: NOTE: Topic names don't allow guessing
+		parse([]byte(sensorJson), "generic-topic")
+		parse([]byte(switchJson), "generic-topic")
+	}
+}
+
+func BenchmarkParserSpeedFromGuess(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		parse([]byte(sensorJson), "thermostat")
+		parse([]byte(switchJson), "switch")
 	}
 }
 
