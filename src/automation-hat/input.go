@@ -1,6 +1,7 @@
 package automation_hat
 
 type input struct {
+	messageBus
 	pin uint8
 	ledContainer
 }

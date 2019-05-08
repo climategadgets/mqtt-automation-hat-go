@@ -1,6 +1,7 @@
 package automation_hat
 
 type light struct {
+	messageBus
 	pin        uint8
 	state      bool
 	brightness float64

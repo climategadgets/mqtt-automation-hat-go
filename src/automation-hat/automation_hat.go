@@ -6,7 +6,13 @@ import (
 	"sync"
 )
 
+type messageBus struct {
+	// Conveys control messages from individual abstractions to centralized hardware adapter
+	control chan<- interface{}
+}
+
 type automationHatBase struct {
+	control <-chan interface{}
 	adc24  [3]ADC24
 	input  [3]Input
 	output [3]Output
@@ -80,6 +86,9 @@ func newAutomationHAT() AutomationHAT {
 
 func initialize(hat *automationHatBase) {
 
+	var control chan interface{} = make(chan interface{})
+	hat.control = control
+
 	// Pinout: https://pinout.xyz/pinout/automation_hat#
 
 	// Input and output numbers are BCM pin numbers
@@ -97,9 +106,9 @@ func initialize(hat *automationHatBase) {
 	hat.output[1] = GetOutput(12, 4)
 	hat.output[2] = GetOutput(6, 5)
 
-	hat.relay[0] = GetRelay(13, 6, 7)
-	hat.relay[1] = GetRelay(19, 8, 9)
-	hat.relay[2] = GetRelay(16, 10, 11)
+	hat.relay[0] = GetRelay(control, 13, 6, 7)
+	hat.relay[1] = GetRelay(control, 19, 8, 9)
+	hat.relay[2] = GetRelay(control, 16, 10, 11)
 
 	hat.adc33 = GetADC33(3, 3.3)
 

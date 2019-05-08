@@ -1,6 +1,7 @@
 package automation_hat
 
 type output struct {
+	messageBus
 	pin uint8
 	ledContainer
 }

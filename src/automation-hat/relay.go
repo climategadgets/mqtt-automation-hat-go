@@ -5,6 +5,7 @@ import (
 )
 
 type relay struct {
+	messageBus
 	state bool
 	pin   uint8
 	ledNO uint8
@@ -12,9 +13,9 @@ type relay struct {
 	led   [2]Light
 }
 
-func GetRelay(pin uint8, ledNO uint8, ledNC uint8) Relay {
+func GetRelay(control chan<- interface{}, pin uint8, ledNO uint8, ledNC uint8) Relay {
 
-	r := &relay{pin: pin, ledNO: ledNO, ledNC: ledNC}
+	r := &relay{messageBus: messageBus{control},pin: pin, ledNO: ledNO, ledNC: ledNC}
 
 	r.led[0] = GetLED(ledNO)
 	r.led[1] = GetLED(ledNC)
