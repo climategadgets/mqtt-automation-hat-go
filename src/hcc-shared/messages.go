@@ -11,7 +11,7 @@ const (
 )
 
 type HccMessageEntity struct {
-	Type EntityType `json:"entityType""`
+	Type EntityType `json:"entityType"`
 }
 
 type HccMessageBase struct {
