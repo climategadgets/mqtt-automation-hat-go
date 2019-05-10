@@ -28,8 +28,7 @@ func newAutomationHAT() AutomationHAT {
 			case m := <-control:
 				// VT: FIXME: Errorf so it is visible in the log
 				zap.S().Errorf("control/rpio: %v", m)
-
-				// VT: FIXME: Pass it down to rpio right here
+				execute(m)
 			}
 		}
 
@@ -40,4 +39,27 @@ func newAutomationHAT() AutomationHAT {
 
 func (hat automationHatPi) Close() error {
 	return rpio.Close()
+}
+
+// Executes the request
+func execute(message interface{}) {
+
+	switch command := message.(type) {
+	case relayCommand:
+		executeRelay(command)
+	default:
+		zap.S().Errorf("don't know how to execute %v", message)
+	}
+}
+
+func executeRelay(command relayCommand) {
+
+	pin := rpio.Pin(command.pin)
+	pin.Output()
+
+	if command.state {
+		pin.High()
+	} else {
+		pin.Low()
+	}
 }
