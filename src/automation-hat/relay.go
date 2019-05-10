@@ -5,6 +5,7 @@ import (
 )
 
 type relay struct {
+	messageBus
 	state bool
 	pin   uint8
 	ledNO uint8
@@ -12,9 +13,14 @@ type relay struct {
 	led   [2]Light
 }
 
-func GetRelay(pin uint8, ledNO uint8, ledNC uint8) Relay {
+type relayCommand struct {
+	relay
+	changed bool
+}
 
-	r := &relay{pin: pin, ledNO: ledNO, ledNC: ledNC}
+func GetRelay(control chan<- interface{}, pin uint8, ledNO uint8, ledNC uint8) Relay {
+
+	r := &relay{messageBus: messageBus{control}, pin: pin, ledNO: ledNO, ledNC: ledNC}
 
 	r.led[0] = GetLED(ledNO)
 	r.led[1] = GetLED(ledNC)
@@ -30,10 +36,13 @@ func (r *relay) Set(state bool) bool {
 
 	changed := r.state != state
 
-	// VT: FIXME: Need to implement the state change, though
 	r.state = state
 
 	zap.S().Infof("relay: pin=%v, ledNO=%v, ledNC=%v, state=%v, changed=%v", r.pin, r.ledNO, r.ledNC, state, changed)
+
+	// VT: NOTE: Counterintuitively, 'changed' is not always true. Remains to be seen how useful it is, though
+	r.control <- relayCommand{*r, changed}
+
 	return changed
 }
 

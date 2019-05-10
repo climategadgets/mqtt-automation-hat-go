@@ -1,18 +1,22 @@
 package automation_hat
 
 import (
-	"github.com/stianeikeland/go-rpio"
-	"go.uber.org/zap"
 	"sync"
 )
 
+type messageBus struct {
+	// Conveys control messages from individual abstractions to centralized hardware adapter
+	control chan<- interface{}
+}
+
 type automationHatBase struct {
-	adc24  [3]ADC24
-	input  [3]Input
-	output [3]Output
-	relay  [3]Relay
-	adc33  ADC33
-	status StatusLights
+	control <-chan interface{}
+	adc24   [3]ADC24
+	input   [3]Input
+	output  [3]Output
+	relay   [3]Relay
+	adc33   ADC33
+	status  StatusLights
 }
 
 type statusLights struct {
@@ -21,10 +25,12 @@ type statusLights struct {
 	warn  Light
 }
 
+// See automation_hat_fake.go
 type automationHatFake struct {
 	automationHatBase
 }
 
+// See automation_hat_pi.go
 type automationHatPi struct {
 	automationHatBase
 }
@@ -55,30 +61,11 @@ func GetAutomationHAT() AutomationHAT {
 	return theHat.hat
 }
 
-func newAutomationFake() AutomationHAT {
-
-	zap.S().Warn("using AutomationHAT fake")
-	hat := automationHatBase{}
-	initialize(&hat)
-
-	return automationHatFake{hat}
-}
-
-func newAutomationHAT() AutomationHAT {
-
-	zap.S().Info("creating new instance of AutomationHAT")
-	hat := automationHatBase{}
-	initialize(&hat)
-
-	// VT: NOTE: We can safely assume that since someone's created an instance,
-	// they're going to use it
-
-	rpio.Open()
-
-	return automationHatPi{hat}
-}
-
 func initialize(hat *automationHatBase) {
+
+	// VT: FIXME: Where do I close this channel? Do I need to bother if it is once in a lifetime?
+	var control chan interface{} = make(chan interface{})
+	hat.control = control
 
 	// Pinout: https://pinout.xyz/pinout/automation_hat#
 
@@ -97,21 +84,13 @@ func initialize(hat *automationHatBase) {
 	hat.output[1] = GetOutput(12, 4)
 	hat.output[2] = GetOutput(6, 5)
 
-	hat.relay[0] = GetRelay(13, 6, 7)
-	hat.relay[1] = GetRelay(19, 8, 9)
-	hat.relay[2] = GetRelay(16, 10, 11)
+	hat.relay[0] = GetRelay(control, 13, 6, 7)
+	hat.relay[1] = GetRelay(control, 19, 8, 9)
+	hat.relay[2] = GetRelay(control, 16, 10, 11)
 
 	hat.adc33 = GetADC33(3, 3.3)
 
 	hat.status = statusLights{power: GetLED(17), comms: GetLED(16), warn: GetLED(15)}
-}
-
-func (hat automationHatFake) Close() error {
-	return nil
-}
-
-func (hat automationHatPi) Close() error {
-	return rpio.Close()
 }
 
 func (hat automationHatBase) Relay() [3]Relay {

@@ -73,12 +73,12 @@ func parseSensor(source []byte, topic string) interface{} {
 	err := json.Unmarshal(source, &payload)
 
 	if err != nil {
-		zap.S().Errorf("malformed sensor (%v): %v", err, source)
+		zap.S().Errorf("malformed sensor (%v): %s", err, source)
 		return nil
 	}
 
 	if payload.Signal == nil {
-		zap.S().Error("not a sensor (no signal): %v", source)
+		zap.S().Error("not a sensor (no signal): %s", source)
 		return nil
 	}
 
@@ -94,12 +94,12 @@ func parseSwitch(source []byte, topic string) interface{} {
 	err := json.Unmarshal(source, &payload)
 
 	if err != nil {
-		zap.S().Errorf("malformed switch (%v): %v", err, source)
+		zap.S().Errorf("malformed switch (%v): %s", err, source)
 		return nil
 	}
 
 	if payload.State == nil {
-		zap.S().Error("not a switch (no state): %v", source)
+		zap.S().Error("not a switch (no state): %s", source)
 		return nil
 	}
 
@@ -115,7 +115,7 @@ func parseZone(source []byte, topic string) interface{} {
 	err := json.Unmarshal(source, &payload)
 
 	if err != nil {
-		zap.S().Errorf("malformed zone (%v): %v", err, source)
+		zap.S().Errorf("malformed zone (%v): %s", err, source)
 		return nil
 	}
 
