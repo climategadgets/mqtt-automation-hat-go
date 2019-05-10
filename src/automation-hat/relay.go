@@ -20,7 +20,7 @@ type relayCommand struct {
 
 func GetRelay(control chan<- interface{}, pin uint8, ledNO uint8, ledNC uint8) Relay {
 
-	r := &relay{messageBus: messageBus{control},pin: pin, ledNO: ledNO, ledNC: ledNC}
+	r := &relay{messageBus: messageBus{control}, pin: pin, ledNO: ledNO, ledNC: ledNC}
 
 	r.led[0] = GetLED(ledNO)
 	r.led[1] = GetLED(ledNC)

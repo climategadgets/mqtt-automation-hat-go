@@ -11,12 +11,12 @@ type messageBus struct {
 
 type automationHatBase struct {
 	control <-chan interface{}
-	adc24  [3]ADC24
-	input  [3]Input
-	output [3]Output
-	relay  [3]Relay
-	adc33  ADC33
-	status StatusLights
+	adc24   [3]ADC24
+	input   [3]Input
+	output  [3]Output
+	relay   [3]Relay
+	adc33   ADC33
+	status  StatusLights
 }
 
 type statusLights struct {

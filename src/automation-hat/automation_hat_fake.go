@@ -27,4 +27,3 @@ func newAutomationFake() AutomationHAT {
 func (hat automationHatFake) Close() error {
 	return nil
 }
-
