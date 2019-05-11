@@ -21,7 +21,7 @@ const (
 
 type sn3218 struct {
 	bus    *i2c.I2CBus
-	values [18]byte
+	values [18]byte // values provided by Output() or SetLED() with no gamma correction applied
 	gamma  [18]*[256]byte
 }
 
@@ -66,6 +66,7 @@ func (driver *sn3218) Close() error {
 func (driver *sn3218) Reset() error {
 
 	for channel := 0; channel < 18; channel++ {
+		driver.values[channel] = 0x00;
 		driver.SetChannelGamma(byte(channel), nil)
 	}
 	return driver.bus.WriteByteBlock(i2cAddress, cmdReset, []byte{0xFF})
@@ -102,11 +103,14 @@ func (driver *sn3218) SetChannelGamma(channel uint8, gamma *[256]byte) {
 	driver.gamma[channel] = gamma
 }
 
-func (driver sn3218) Output(values [18]byte) error {
+func (driver *sn3218) Output(values [18]byte) error {
 
 	mapped := [18]byte{}
 
 	for channel := 0; channel < 18; channel++ {
+
+		driver.values[channel] = values[channel]
+
 		if driver.gamma[channel] == nil {
 			mapped[channel] = values[channel]
 		} else {
@@ -119,6 +123,15 @@ func (driver sn3218) Output(values [18]byte) error {
 	}
 
 	return driver.bus.WriteByteBlock(i2cAddress, cmdUpdate, []byte{0xFF})
+}
+
+func (driver sn3218) GetLED(channel uint8) byte {
+	return driver.values[channel]
+}
+
+func (driver *sn3218) SetLED(channel uint8, intensity byte) error {
+	driver.values[channel] = intensity
+	return driver.Output(driver.values)
 }
 
 func newSN3218() (*sn3218, error) {

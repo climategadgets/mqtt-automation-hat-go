@@ -11,4 +11,6 @@ type SN3218 interface {
 	GetChannelGamma(channel uint8) *[256]byte
 	SetChannelGamma(channel uint8, gamma *[256]byte)
 	Output(values [18]byte) error
+	SetLED(channel uint8, intensity byte) error
+	GetLED(channel uint8) byte
 }

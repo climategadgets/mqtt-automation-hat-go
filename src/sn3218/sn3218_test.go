@@ -3,11 +3,11 @@
 package sn3218
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
 
+// TestLightRing lights one LED at a time using EnableLEDs()
 func TestLightRing(t *testing.T) {
 
 	values := [18]byte{}
@@ -30,9 +30,8 @@ func TestLightRing(t *testing.T) {
 
 		var mask uint32
 		mask = 0x01 << shift
-		fmt.Printf("EnableLEDs(%018b)\n", mask)
 		driver.EnableLEDs(mask)
-		time.Sleep(250 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
@@ -107,4 +106,33 @@ func fade(driver SN3218) {
 		}
 		driver.Output(values)
 	}
+}
+
+// TestLightRingSet lights LEDs one by one using SetLED()
+func TestLightFill(t *testing.T) {
+
+	values := [18]byte{}
+	for offset := 0; offset < 18; offset++ {
+		// VT: NOTE: 0xFF is way too bright
+		values[offset] = 0x55
+	}
+
+	driver := GetSN3218()
+	defer driver.Close()
+
+	driver.Reset()
+	driver.Enable(true)
+
+	// 0b111111111111111111, all of them
+	driver.EnableLEDs(0x3FFFF)
+
+	for channel := 0; channel < 18; channel++ {
+		driver.SetLED(byte(channel), 0x55)
+		time.Sleep(100 * time.Millisecond)
+
+		if driver.GetLED(byte(channel)) != 0x55 {
+			t.Fatalf("value mismatch for channel %d, expected 0x55, received %x", channel, driver.GetLED(byte(channel)))
+		}
+	}
+	time.Sleep(500 * time.Millisecond)
 }
