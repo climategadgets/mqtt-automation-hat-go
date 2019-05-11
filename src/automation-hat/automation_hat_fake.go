@@ -17,12 +17,12 @@ func newAutomationFake() AutomationHAT {
 			case m, ok := <-control:
 
 				if !ok {
-					zap.S().Errorf("control/fake channel closed?")
+					zap.S().Errorw("control/fake channel closed?")
 					break
 				}
 				// VT: NOTE: This is all we do here in the fake, log.
-				// VT: FIXME: Errorf so it is visible in the log
-				zap.S().Errorf("control/fake: %v", m)
+				// VT: FIXME: Errorw so it is visible in the log
+				zap.S().Errorw("control/fake", "message", m)
 			}
 		}
 

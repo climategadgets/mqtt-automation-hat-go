@@ -28,7 +28,7 @@ func (l *light) Set(state bool) bool {
 
 	l.state = state
 
-	zap.S().Infof("light: pin=%v, state=%v, brightness=%d, changed=%v", l.pin, l.state, l.brightness, changed)
+	zap.S().Infow("set", "entityType", "light", "pin", l.pin, "state", l.state, "changed", changed)
 
 	// VT: NOTE: Counterintuitively, 'changed' is not always true. Remains to be seen how useful it is, though
 	l.control <- lightCommand{*l, changed}

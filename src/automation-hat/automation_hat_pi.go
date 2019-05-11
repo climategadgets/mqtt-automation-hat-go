@@ -33,11 +33,11 @@ func newAutomationHAT() AutomationHAT {
 			case m, ok := <-control:
 
 				if !ok {
-					zap.S().Errorf("control/pi channel closed?")
+					zap.S().Errorw("control/pi channel closed?")
 					break
 				}
-				// VT: FIXME: Errorf so it is visible in the log
-				zap.S().Errorf("control/rpio: %v", m)
+				// VT: FIXME: Errorw so it is visible in the log
+				zap.S().Errorw("control/rpio", "message", m)
 				execute(m)
 			}
 		}
@@ -74,7 +74,7 @@ func execute(message interface{}) {
 	case lightCommand:
 		executeLight(command)
 	default:
-		zap.S().Errorf("don't know how to execute %v", message)
+		zap.S().Errorw("don't know how to execute", "message", message)
 	}
 }
 
