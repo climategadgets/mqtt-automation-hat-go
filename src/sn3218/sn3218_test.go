@@ -111,12 +111,6 @@ func fade(driver SN3218) {
 // TestLightRingSet lights LEDs one by one using SetLED()
 func TestLightFill(t *testing.T) {
 
-	values := [18]byte{}
-	for offset := 0; offset < 18; offset++ {
-		// VT: NOTE: 0xFF is way too bright
-		values[offset] = 0x55
-	}
-
 	driver := GetSN3218()
 	defer driver.Close()
 
@@ -134,5 +128,6 @@ func TestLightFill(t *testing.T) {
 			t.Fatalf("value mismatch for channel %d, expected 0x55, received %x", channel, driver.GetLED(byte(channel)))
 		}
 	}
+
 	time.Sleep(500 * time.Millisecond)
 }
