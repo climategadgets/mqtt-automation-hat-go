@@ -17,14 +17,14 @@ func TestLightRing(t *testing.T) {
 	}
 
 	driver := GetSN3218()
+	defer driver.Close()
 
 	driver.Reset()
 	driver.Enable(true)
-	defer driver.Enable(false)
 
 	var shift uint32
 
-	driver.output(values)
+	driver.Output(values)
 
 	for shift = 0; shift < 18; shift++ {
 
