@@ -34,6 +34,10 @@ func (r relay) Get() bool {
 
 func (r *relay) Set(state bool) bool {
 
+	if r.control == nil {
+		panic("nil control channel")
+	}
+
 	changed := r.state != state
 
 	r.state = state

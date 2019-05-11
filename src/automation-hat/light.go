@@ -20,6 +20,10 @@ func (l light) Get() bool {
 
 func (l *light) Set(state bool) bool {
 
+	if l.control == nil {
+		panic("nil control channel")
+	}
+
 	changed := l.state != state
 
 	l.state = state
