@@ -22,8 +22,8 @@ func GetRelay(control chan<- interface{}, pin uint8, ledNO uint8, ledNC uint8) R
 
 	r := &relay{messageBus: messageBus{control}, pin: pin, ledNO: ledNO, ledNC: ledNC}
 
-	r.led[0] = GetLED(ledNO)
-	r.led[1] = GetLED(ledNC)
+	r.led[0] = GetLED(control, ledNO)
+	r.led[1] = GetLED(control, ledNC)
 
 	return r
 }

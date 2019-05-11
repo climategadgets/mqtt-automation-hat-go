@@ -72,17 +72,17 @@ func initialize(hat *automationHatBase) {
 	// Input and output numbers are BCM pin numbers
 	// LED numbers are from a different namespace (SN3218 PWM driver)
 
-	hat.adc24[0] = GetADC24(0, 25.85, 0)
-	hat.adc24[1] = GetADC24(1, 25.85, 1)
-	hat.adc24[2] = GetADC24(2, 25.85, 2)
+	hat.adc24[0] = GetADC24(control, 0, 25.85, 0)
+	hat.adc24[1] = GetADC24(control, 1, 25.85, 1)
+	hat.adc24[2] = GetADC24(control, 2, 25.85, 2)
 
-	hat.input[0] = GetInput(26, 14)
-	hat.input[1] = GetInput(20, 13)
-	hat.input[2] = GetInput(21, 12)
+	hat.input[0] = GetInput(control, 26, 14)
+	hat.input[1] = GetInput(control, 20, 13)
+	hat.input[2] = GetInput(control, 21, 12)
 
-	hat.output[0] = GetOutput(5, 3)
-	hat.output[1] = GetOutput(12, 4)
-	hat.output[2] = GetOutput(6, 5)
+	hat.output[0] = GetOutput(control, 5, 3)
+	hat.output[1] = GetOutput(control, 12, 4)
+	hat.output[2] = GetOutput(control, 6, 5)
 
 	hat.relay[0] = GetRelay(control, 13, 6, 7)
 	hat.relay[1] = GetRelay(control, 19, 8, 9)
@@ -90,7 +90,7 @@ func initialize(hat *automationHatBase) {
 
 	hat.adc33 = GetADC33(3, 3.3)
 
-	hat.status = statusLights{power: GetLED(17), comms: GetLED(16), warn: GetLED(15)}
+	hat.status = statusLights{power: GetLED(control, 17), comms: GetLED(control, 16), warn: GetLED(control, 15)}
 }
 
 func (hat automationHatBase) Relay() [3]Relay {

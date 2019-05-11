@@ -6,8 +6,8 @@ type output struct {
 	ledContainer
 }
 
-func GetOutput(pin uint8, ledPin uint8) Output {
-	return output{pin: pin, ledContainer: ledContainer{GetLED(ledPin)}}
+func GetOutput(control chan<- interface{}, pin uint8, ledPin uint8) Output {
+	return output{messageBus: messageBus{control}, pin: pin, ledContainer: ledContainer{GetLED(control, ledPin)}}
 }
 
 func (o output) Light() Light {

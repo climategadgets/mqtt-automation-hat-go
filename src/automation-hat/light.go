@@ -36,8 +36,8 @@ func (l *light) Set(state bool) bool {
 	return changed
 }
 
-func GetLED(pin uint8) Light {
-	return &light{pin: pin}
+func GetLED(control chan<- interface{}, pin uint8) Light {
+	return &light{messageBus: messageBus{control}, pin: pin}
 }
 
 type ledContainer struct {
