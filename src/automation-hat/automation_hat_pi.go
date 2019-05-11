@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"github.com/stianeikeland/go-rpio"
 	"go.uber.org/zap"
+	"time"
 )
 
 func newAutomationHAT() AutomationHAT {
 
 	zap.S().Info("creating new instance of AutomationHAT")
-	hat := automationHatBase{}
-	initialize(&hat)
+	hatBase := automationHatBase{}
+	initialize(&hatBase)
 
 	// VT: NOTE: We can safely assume that since someone's created an instance,
 	// they're going to use it
@@ -22,6 +23,8 @@ func newAutomationHAT() AutomationHAT {
 		// VT: NOTE: It makes no sense to continue, just bail out
 		panic(fmt.Sprintf("can't open rpio, reason: %v", err))
 	}
+
+	hat := automationHatPi{hatBase}
 
 	go func(control <-chan interface{}) {
 
@@ -41,10 +44,24 @@ func newAutomationHAT() AutomationHAT {
 
 	}(hat.control)
 
-	return automationHatPi{hat}
+	// Now that we have the hardware listener in place, we can reset the board state
+	reset(&hat)
+
+	zap.S().Info("init: giving the board a chance to settle...")
+	time.Sleep(500 * time.Millisecond)
+	zap.S().Info("init: done")
+
+	return hat
 }
 
 func (hat automationHatPi) Close() error {
+
+	reset(&hat)
+
+	zap.S().Info("close(): giving the board a chance to settle...")
+	time.Sleep(250 * time.Millisecond)
+	zap.S().Info("close(): done")
+
 	return rpio.Close()
 }
 
@@ -69,4 +86,13 @@ func executeRelay(command relayCommand) {
 	} else {
 		pin.Low()
 	}
+}
+
+func reset(pi *automationHatPi) {
+
+	for _, relay := range pi.relay {
+		relay.Set(false)
+	}
+
+	// VT: FIXME: Reset the lights and other things
 }
