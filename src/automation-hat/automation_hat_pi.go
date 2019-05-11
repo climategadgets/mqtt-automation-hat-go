@@ -25,7 +25,12 @@ func newAutomationHAT() AutomationHAT {
 
 		for {
 			select {
-			case m := <-control:
+			case m, ok := <-control:
+
+				if !ok {
+					zap.S().Errorf("control/pi channel closed?")
+					break
+				}
 				// VT: FIXME: Errorf so it is visible in the log
 				zap.S().Errorf("control/rpio: %v", m)
 				execute(m)
