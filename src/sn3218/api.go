@@ -8,6 +8,7 @@ type SN3218 interface {
 	Reset() error
 	Enable(state bool) error
 	EnableLEDs(mask uint32) error
-	SetChannelGamma(channel uint8, gamma [256]uint8) error
+	GetChannelGamma(channel uint8) *[256]byte
+	SetChannelGamma(channel uint8, gamma *[256]byte)
 	Output(values [18]byte) error
 }

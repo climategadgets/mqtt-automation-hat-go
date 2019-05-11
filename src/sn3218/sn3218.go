@@ -22,6 +22,7 @@ const (
 type sn3218 struct {
 	bus    *i2c.I2CBus
 	values [18]byte
+	gamma  [18]*[256]byte
 }
 
 type driverLocker struct {
@@ -53,7 +54,7 @@ func GetSN3218() SN3218 {
 	return theDriver.driver
 }
 
-func (driver sn3218) Close() error {
+func (driver *sn3218) Close() error {
 
 	if err := driver.Enable(false); err != nil {
 		return err
@@ -61,8 +62,12 @@ func (driver sn3218) Close() error {
 	return driver.Reset()
 }
 
-// Reset resets all hardware registers
-func (driver sn3218) Reset() error {
+// Reset resets all hardware registers and gamma correction
+func (driver *sn3218) Reset() error {
+
+	for channel := 0; channel < 18; channel++ {
+		driver.SetChannelGamma(byte(channel), nil)
+	}
 	return driver.bus.WriteByteBlock(i2cAddress, cmdReset, []byte{0xFF})
 }
 
@@ -85,14 +90,31 @@ func (driver sn3218) EnableLEDs(mask uint32) error {
 	return driver.bus.WriteByteBlock(i2cAddress, cmdUpdate, []byte{0xFF})
 }
 
-// SetChannelGamma provides Gamma Correction (see the PDF at the top).
-func (driver sn3218) SetChannelGamma(channel uint8, gamma [256]uint8) error {
-	return nil
+// GetChannelGamma returns current Gamma Correction value for the channel (see the PDF at the top).
+// nil return value indicates there is no gamma correction in place.
+func (driver sn3218) GetChannelGamma(channel uint8) *[256]byte {
+	return driver.gamma[channel]
+}
+
+// SetChannelGamma provides Gamma Correction for the channel (see the PDF at the top).
+// nil value for the gamma argument means gamma correction will not be performed and intensity value will be used raw.
+func (driver *sn3218) SetChannelGamma(channel uint8, gamma *[256]byte) {
+	driver.gamma[channel] = gamma
 }
 
 func (driver sn3218) Output(values [18]byte) error {
 
-	if err := driver.bus.WriteByteBlock(i2cAddress, cmdSetPwmValues, values[0:18]); err != nil {
+	mapped := [18]byte{}
+
+	for channel := 0; channel < 18; channel++ {
+		if driver.gamma[channel] == nil {
+			mapped[channel] = values[channel]
+		} else {
+			mapped[channel] = driver.gamma[channel][values[channel]]
+		}
+	}
+
+	if err := driver.bus.WriteByteBlock(i2cAddress, cmdSetPwmValues, mapped[0:18]); err != nil {
 		return err
 	}
 
@@ -110,5 +132,5 @@ func newSN3218() (*sn3218, error) {
 	}
 
 	values := [18]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-	return &sn3218{bus, values}, nil
+	return &sn3218{bus, values, [18]*[256]byte{}}, nil
 }
