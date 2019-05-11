@@ -1,3 +1,5 @@
+// +build !arm
+
 package automation_hat
 
 import "go.uber.org/zap"
