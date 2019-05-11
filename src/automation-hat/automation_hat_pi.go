@@ -71,6 +71,8 @@ func execute(message interface{}) {
 	switch command := message.(type) {
 	case relayCommand:
 		executeRelay(command)
+	case lightCommand:
+		executeLight(command)
 	default:
 		zap.S().Errorf("don't know how to execute %v", message)
 	}
@@ -86,6 +88,11 @@ func executeRelay(command relayCommand) {
 	} else {
 		pin.Low()
 	}
+}
+
+func executeLight(command lightCommand) {
+
+	zap.S().Errorf("FIXME: implement %v", command)
 }
 
 func reset(pi *automationHatPi) {

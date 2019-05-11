@@ -47,6 +47,14 @@ func (r *relay) Set(state bool) bool {
 	// VT: NOTE: Counterintuitively, 'changed' is not always true. Remains to be seen how useful it is, though
 	r.control <- relayCommand{*r, changed}
 
+	if state {
+		r.led[0].Set(true)
+		r.led[1].Set(false)
+	} else {
+		r.led[0].Set(false)
+		r.led[1].Set(true)
+	}
+
 	return changed
 }
 
