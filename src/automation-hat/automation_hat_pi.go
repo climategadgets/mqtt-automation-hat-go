@@ -124,11 +124,12 @@ func executeLight(hat automationHatPi, command lightCommand) {
 
 func reset(hat *automationHatPi) {
 
+	// LED driver goes first because relays use LEDs to indicate their status
+	hat.ledDriver.Reset()
+
 	for _, relay := range hat.relay {
 		relay.Set(false)
 	}
-
-	hat.ledDriver.Reset()
 
 	// VT: FIXME: Reset other things
 }
