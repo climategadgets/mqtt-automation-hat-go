@@ -1,12 +1,17 @@
 package automation_hat
 
 import (
+	"go.uber.org/zap"
 	"testing"
 	"time"
 )
 
 // Flip all the lights except relay for 2 seconds, then shut off
 func TestLights(t *testing.T) {
+
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
 
 	hat := GetAutomationHAT()
 	lights := make([]Light, 0)

@@ -2,11 +2,16 @@ package automation_hat
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"testing"
 )
 
 // Make sure only a single instance is created
 func TestGetAutomationHAT(t *testing.T) {
+
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
 
 	hat1 := GetAutomationHAT()
 	hat2 := GetAutomationHAT()
@@ -20,6 +25,10 @@ func TestGetAutomationHAT(t *testing.T) {
 // Make sure lights and relays behave as switches and keep state
 func TestRelaySwitch(t *testing.T) {
 
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
+
 	hat := GetAutomationHAT()
 
 	testSwitch(t, hat.Relay()[0])
@@ -28,12 +37,20 @@ func TestRelaySwitch(t *testing.T) {
 // Make sure lights and relays behave as switches and keep state
 func TestLightSwitch(t *testing.T) {
 
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
+
 	hat := GetAutomationHAT()
 
 	testSwitch(t, hat.StatusLights().Power())
 }
 
 func testSwitch(t *testing.T, s Switch) {
+
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
 
 	state := s.Get()
 	changed := s.Set(!state)
