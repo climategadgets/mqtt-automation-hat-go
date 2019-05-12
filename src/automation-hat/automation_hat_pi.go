@@ -91,7 +91,7 @@ func execute(hat automationHatPi, message interface{}) {
 }
 
 const (
-	ledIntensity = 0x55 // 0xFF is way too bright on Pimoroni Automation HAT even in daylight
+	ledIntensity = 0x33 // LEDs are extremely bright even in daylight
 )
 
 func executeRelay(hat automationHatPi, command relayCommand) {
