@@ -6,7 +6,7 @@ type light struct {
 	messageBus
 	pin        uint8
 	state      bool
-	brightness float64
+	brightness byte
 }
 
 type lightCommand struct {
@@ -20,11 +20,15 @@ func (l light) Get() bool {
 
 func (l *light) Set(state bool) bool {
 
+	if l.control == nil {
+		panic("nil control channel")
+	}
+
 	changed := l.state != state
 
 	l.state = state
 
-	zap.S().Infof("light: pin=%v, state=%v, brightness=%v, changed=%v", l.pin, l.state, l.brightness, changed)
+	zap.S().Infow("light", "func", "Set", "entityType", "light", "pin", l.pin, "state", l.state, "changed", changed)
 
 	// VT: NOTE: Counterintuitively, 'changed' is not always true. Remains to be seen how useful it is, though
 	l.control <- lightCommand{*l, changed}
@@ -32,8 +36,8 @@ func (l *light) Set(state bool) bool {
 	return changed
 }
 
-func GetLED(pin uint8) Light {
-	return &light{pin: pin}
+func GetLED(control chan<- interface{}, pin uint8) Light {
+	return &light{messageBus: messageBus{control}, pin: pin}
 }
 
 type ledContainer struct {

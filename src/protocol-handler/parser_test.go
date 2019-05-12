@@ -3,6 +3,7 @@ package protocol_handler
 import (
 	"encoding/json"
 	"github.com/climategadgets/mqtt-automation-hat-go/src/hcc-shared"
+	"go.uber.org/zap"
 	"testing"
 )
 
@@ -63,6 +64,10 @@ func BenchmarkParserZoneFail(b *testing.B) {
 
 func BenchmarkParserSpeedFromSeed(b *testing.B) {
 
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
+
 	for i := 0; i < b.N; i++ {
 		// VT: NOTE: Topic names don't allow guessing
 		parse([]byte(sensorJson), "generic-topic")
@@ -72,6 +77,10 @@ func BenchmarkParserSpeedFromSeed(b *testing.B) {
 }
 
 func BenchmarkParserSpeedFromGuess(b *testing.B) {
+
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
 
 	for i := 0; i < b.N; i++ {
 		parse([]byte(sensorJson), "sensor")

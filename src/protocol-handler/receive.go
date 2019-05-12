@@ -48,17 +48,17 @@ func parse(source []byte, topic string) interface{} {
 func parseGuess(source []byte, topic string) interface{} {
 
 	if strings.Contains(topic, string(hcc_shared.TypeSensor)) {
-		zap.S().Debugf("guessing this is a sensor: %s", topic)
+		zap.S().Debugw("guessing this is a sensor", "topic", topic)
 		return parseSensor(source, topic)
 	}
 
 	if strings.Contains(topic, string(hcc_shared.TypeSwitch)) {
-		zap.S().Debugf("guessing this is a switch: %s", topic)
+		zap.S().Debugw("guessing this is a switch", "topic", topic)
 		return parseSwitch(source, topic)
 	}
 
 	if strings.Contains(topic, string(hcc_shared.TypeZone)) {
-		zap.S().Debugf("guessing this is a zone: %s", topic)
+		zap.S().Debugw("guessing this is a zone", "topic", topic)
 		return parseZone(source, topic)
 	}
 
@@ -73,7 +73,7 @@ func parseSensor(source []byte, topic string) interface{} {
 	err := json.Unmarshal(source, &payload)
 
 	if err != nil {
-		zap.S().Errorf("malformed sensor (%v): %s", err, source)
+		zap.S().Errorw("malformed message", "entityType", "sensor", "error", err, "source", string(source))
 		return nil
 	}
 
@@ -82,7 +82,7 @@ func parseSensor(source []byte, topic string) interface{} {
 		return nil
 	}
 
-	zap.S().Debugf("receive: sensor: %v = %v", topic, *payload.Signal)
+	zap.S().Debugw("receive", "entityType", "sensor", "topic", topic, "payload", *payload.Signal)
 	return payload
 }
 
@@ -94,7 +94,7 @@ func parseSwitch(source []byte, topic string) interface{} {
 	err := json.Unmarshal(source, &payload)
 
 	if err != nil {
-		zap.S().Errorf("malformed switch (%v): %s", err, source)
+		zap.S().Errorw("malformed message", "entityType", "switch", "error", err, "source", string(source))
 		return nil
 	}
 
@@ -103,7 +103,7 @@ func parseSwitch(source []byte, topic string) interface{} {
 		return nil
 	}
 
-	zap.S().Debugf("receive: switch: %v = %v", topic, *payload.State)
+	zap.S().Debugw("receive", "entityType", "switch", "topic", topic, "payload", *payload.State)
 	return payload
 }
 
@@ -115,7 +115,7 @@ func parseZone(source []byte, topic string) interface{} {
 	err := json.Unmarshal(source, &payload)
 
 	if err != nil {
-		zap.S().Errorf("malformed zone (%v): %s", err, source)
+		zap.S().Errorw("malformed message", "entityType", "zone", "error", err, "source", string(source))
 		return nil
 	}
 
@@ -124,7 +124,7 @@ func parseZone(source []byte, topic string) interface{} {
 		return nil
 	}
 
-	zap.S().Debugf("receive: zone: %v = %v", topic, payload)
+	zap.S().Debugw("receive", "entityType", "zone", "topic", topic, "payload", payload)
 	return payload
 }
 
@@ -159,7 +159,7 @@ func Receive(client mqtt.Client, message mqtt.Message, automationHat automation_
 
 func processSwitch(topic string, m hcc_shared.HccMessageSwitch, automationHat automation_hat.AutomationHAT, config cf.ConfigHAT) {
 
-	zap.S().Infof(fmt.Sprintf("process: switch: %v = %v", topic, *m.State))
+	zap.S().Infow("process", "entityType", "switch", "topic", topic, "state", *m.State)
 
 	switchMap := config["switchMap"]
 	for switchId, switchConfig := range switchMap {
@@ -183,5 +183,5 @@ func processSwitch(topic string, m hcc_shared.HccMessageSwitch, automationHat au
 		}
 	}
 
-	zap.S().Warnf("no matching topic in the config: %v", topic)
+	zap.S().Warnw("no matching topic in the config", "topic", topic)
 }

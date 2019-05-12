@@ -87,7 +87,7 @@ func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat
 
 	go func() {
 		for sig := range sig {
-			zap.S().Infof("captured %v signal, shutting down", sig)
+			zap.S().Infow("shutting down", "signal", sig)
 
 			var done sync.WaitGroup
 			done.Add(2)
@@ -104,7 +104,7 @@ func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat
 
 				duration := time.Since(now)
 
-				zap.S().Infof("MQTT disconnected in %v", duration)
+				zap.S().Infow("MQTT disconnected", "duration", duration)
 			}()
 
 			// Shut down the Automation HAT
@@ -117,7 +117,7 @@ func installShutDownHandler(mqttClient mqtt.Client, automationHat automation_hat
 
 				duration := time.Since(now)
 
-				zap.S().Infof("AutomationHAT shut down in %v", duration)
+				zap.S().Infow("AutomationHAT shut down", "duration", duration)
 			}()
 
 			done.Wait()

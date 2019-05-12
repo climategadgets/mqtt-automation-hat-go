@@ -6,8 +6,8 @@ type input struct {
 	ledContainer
 }
 
-func GetInput(pin uint8, ledPin uint8) Input {
-	return input{pin: pin, ledContainer: ledContainer{GetLED(ledPin)}}
+func GetInput(control chan<- interface{}, pin uint8, ledPin uint8) Input {
+	return input{messageBus: messageBus{control}, pin: pin, ledContainer: ledContainer{GetLED(control, ledPin)}}
 }
 
 func (i input) Light() Light {

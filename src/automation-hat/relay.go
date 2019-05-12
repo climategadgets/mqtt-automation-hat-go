@@ -22,8 +22,8 @@ func GetRelay(control chan<- interface{}, pin uint8, ledNO uint8, ledNC uint8) R
 
 	r := &relay{messageBus: messageBus{control}, pin: pin, ledNO: ledNO, ledNC: ledNC}
 
-	r.led[0] = GetLED(ledNO)
-	r.led[1] = GetLED(ledNC)
+	r.led[0] = GetLED(control, ledNO)
+	r.led[1] = GetLED(control, ledNC)
 
 	return r
 }
@@ -34,14 +34,26 @@ func (r relay) Get() bool {
 
 func (r *relay) Set(state bool) bool {
 
+	if r.control == nil {
+		panic("nil control channel")
+	}
+
 	changed := r.state != state
 
 	r.state = state
 
-	zap.S().Infof("relay: pin=%v, ledNO=%v, ledNC=%v, state=%v, changed=%v", r.pin, r.ledNO, r.ledNC, state, changed)
+	zap.S().Infow("relay", "func", "Set", "entityType", "relay", "pin", r.pin, "ledNO", r.ledNO, "ledNC", r.ledNC, "state", r.state, "changed", changed)
 
 	// VT: NOTE: Counterintuitively, 'changed' is not always true. Remains to be seen how useful it is, though
 	r.control <- relayCommand{*r, changed}
+
+	if state {
+		r.led[0].Set(true)
+		r.led[1].Set(false)
+	} else {
+		r.led[0].Set(false)
+		r.led[1].Set(true)
+	}
 
 	return changed
 }

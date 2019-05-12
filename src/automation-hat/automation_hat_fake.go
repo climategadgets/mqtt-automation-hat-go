@@ -1,3 +1,5 @@
+// +build !arm
+
 package automation_hat
 
 import "go.uber.org/zap"
@@ -12,10 +14,15 @@ func newAutomationFake() AutomationHAT {
 
 		for {
 			select {
-			case m := <-control:
+			case m, ok := <-control:
+
+				if !ok {
+					zap.S().Errorw("control/fake channel closed?")
+					break
+				}
 				// VT: NOTE: This is all we do here in the fake, log.
-				// VT: FIXME: Errorf so it is visible in the log
-				zap.S().Errorf("control/fake: %v", m)
+				// VT: FIXME: Errorw so it is visible in the log
+				zap.S().Errorw("control/fake", "message", m)
 			}
 		}
 
