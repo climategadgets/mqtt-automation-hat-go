@@ -50,7 +50,7 @@ func newAutomationHAT() AutomationHAT {
 					break
 				}
 				// VT: FIXME: Errorw so it is visible in the log
-				zap.S().Errorw("control/rpio", "message", m)
+				zap.S().Errorw("control/rpio", "message", fmt.Sprintf("%v", m))
 				execute(hat, m)
 			}
 		}
