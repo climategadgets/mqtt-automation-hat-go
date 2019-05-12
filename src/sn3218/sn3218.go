@@ -2,6 +2,7 @@ package sn3218
 
 import (
 	"bitbucket.org/gmcbay/i2c"
+	"go.uber.org/zap"
 	"sync"
 )
 
@@ -130,6 +131,7 @@ func (driver sn3218) GetLED(channel uint8) byte {
 }
 
 func (driver *sn3218) SetLED(channel uint8, intensity byte) error {
+	zap.S().Debugw("SetLED", "channel", channel, "intensity", intensity)
 	driver.values[channel] = intensity
 	return driver.Output(driver.values)
 }

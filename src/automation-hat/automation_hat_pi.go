@@ -4,6 +4,7 @@ package automation_hat
 
 import (
 	"fmt"
+	sn32182 "github.com/climategadgets/mqtt-automation-hat-go/src/sn3218"
 	"github.com/stianeikeland/go-rpio"
 	"go.uber.org/zap"
 	"time"
@@ -24,7 +25,19 @@ func newAutomationHAT() AutomationHAT {
 		panic(fmt.Sprintf("can't open rpio, reason: %v", err))
 	}
 
-	hat := automationHatPi{hatBase}
+	ledDriver := sn32182.GetSN3218()
+
+	if ledDriver == nil {
+		panic("can't open the LED driver, see the logs for the cause")
+	}
+
+	ledDriver.Reset()
+	ledDriver.Enable(true)
+
+	// 0b111111111111111111, all of them
+	ledDriver.EnableLEDs(0x3FFFF)
+
+	hat := automationHatPi{hatBase, ledDriver}
 
 	go func(control <-chan interface{}) {
 
@@ -38,7 +51,7 @@ func newAutomationHAT() AutomationHAT {
 				}
 				// VT: FIXME: Errorw so it is visible in the log
 				zap.S().Errorw("control/rpio", "message", m)
-				execute(m)
+				execute(hat, m)
 			}
 		}
 
@@ -66,40 +79,56 @@ func (hat automationHatPi) Close() error {
 }
 
 // Executes the request
-func execute(message interface{}) {
+func execute(hat automationHatPi, message interface{}) {
 
 	switch command := message.(type) {
 	case relayCommand:
-		executeRelay(command)
+		executeRelay(hat, command)
 	case lightCommand:
-		executeLight(command)
+		executeLight(hat, command)
 	default:
 		zap.S().Errorw("don't know how to execute", "message", message)
 	}
 }
 
-func executeRelay(command relayCommand) {
+const (
+	ledIntensity = 0x55 // 0xFF is way too bright on Pimoroni Automation HAT even in daylight
+)
 
+func executeRelay(hat automationHatPi, command relayCommand) {
+
+	zap.S().Debugw("executeRelay", "pin", command.pin, "state", command.state)
 	pin := rpio.Pin(command.pin)
 	pin.Output()
 
 	if command.state {
 		pin.High()
+		hat.ledDriver.SetLED(command.ledNC, 0)
+		hat.ledDriver.SetLED(command.ledNO, ledIntensity)
 	} else {
 		pin.Low()
+		hat.ledDriver.SetLED(command.ledNC, ledIntensity)
+		hat.ledDriver.SetLED(command.ledNO, 0)
 	}
 }
 
-func executeLight(command lightCommand) {
+func executeLight(hat automationHatPi, command lightCommand) {
 
-	zap.S().Errorf("FIXME: implement %v", command)
+	zap.S().Debugw("executeLight", "pin", command.pin, "state", command.state)
+	if command.state {
+		hat.ledDriver.SetLED(command.pin, ledIntensity)
+	} else {
+		hat.ledDriver.SetLED(command.pin, 0)
+	}
 }
 
-func reset(pi *automationHatPi) {
+func reset(hat *automationHatPi) {
 
-	for _, relay := range pi.relay {
+	for _, relay := range hat.relay {
 		relay.Set(false)
 	}
 
-	// VT: FIXME: Reset the lights and other things
+	hat.ledDriver.Reset()
+
+	// VT: FIXME: Reset other things
 }

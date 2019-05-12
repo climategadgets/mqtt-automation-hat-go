@@ -1,6 +1,7 @@
 package automation_hat
 
 import (
+	"github.com/climategadgets/mqtt-automation-hat-go/src/sn3218"
 	"sync"
 )
 
@@ -33,6 +34,7 @@ type automationHatFake struct {
 // See automation_hat_pi.go
 type automationHatPi struct {
 	automationHatBase
+	ledDriver sn3218.SN3218
 }
 
 type hatLocker struct {
