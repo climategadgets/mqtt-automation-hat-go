@@ -31,12 +31,6 @@ func newAutomationHAT() AutomationHAT {
 		panic("can't open the LED driver, see the logs for the cause")
 	}
 
-	ledDriver.Reset()
-	ledDriver.Enable(true)
-
-	// 0b111111111111111111, all of them
-	ledDriver.EnableLEDs(0x3FFFF)
-
 	hat := automationHatPi{hatBase, ledDriver}
 
 	go func(control <-chan interface{}) {
@@ -59,6 +53,11 @@ func newAutomationHAT() AutomationHAT {
 
 	// Now that we have the hardware listener in place, we can reset the board state
 	reset(&hat)
+
+	ledDriver.Enable(true)
+
+	// 0b111111111111111111, all of them
+	ledDriver.EnableLEDs(0x3FFFF)
 
 	zap.S().Info("init: giving the board a chance to settle...")
 	time.Sleep(500 * time.Millisecond)
