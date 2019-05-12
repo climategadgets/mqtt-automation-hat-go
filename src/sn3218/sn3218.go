@@ -113,6 +113,7 @@ func (driver *sn3218) SetChannelGamma(channel uint8, gamma *[256]byte) {
 }
 
 func (driver *sn3218) Output(values [18]byte) error {
+	zap.S().Debugw("SN3218", "func", "Output", "values", values)
 
 	mapped := [18]byte{}
 
@@ -126,6 +127,8 @@ func (driver *sn3218) Output(values [18]byte) error {
 			mapped[channel] = driver.gamma[channel][values[channel]]
 		}
 	}
+
+	zap.S().Debugw("SN3218", "func", "Output", "mapped", mapped)
 
 	if err := driver.bus.WriteByteBlock(i2cAddress, cmdSetPwmValues, mapped[0:18]); err != nil {
 		return err
