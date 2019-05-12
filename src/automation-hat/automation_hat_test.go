@@ -48,10 +48,6 @@ func TestLightSwitch(t *testing.T) {
 
 func testSwitch(t *testing.T, s Switch) {
 
-	logger, _ := zap.NewDevelopment()
-	zap.ReplaceGlobals(logger)
-	defer logger.Sync()
-
 	state := s.Get()
 	changed := s.Set(!state)
 
