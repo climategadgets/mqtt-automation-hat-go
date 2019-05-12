@@ -2,6 +2,7 @@ package sn3218
 
 import (
 	"bitbucket.org/gmcbay/i2c"
+	"fmt"
 	"go.uber.org/zap"
 	"sync"
 )
@@ -66,14 +67,19 @@ func (driver *sn3218) Close() error {
 // Reset resets all hardware registers and gamma correction
 func (driver *sn3218) Reset() error {
 
+	zap.S().Debugw("SN3218", "func", "Reset")
+
 	for channel := 0; channel < 18; channel++ {
-		driver.values[channel] = 0x00;
+		driver.values[channel] = 0x00
 		driver.SetChannelGamma(byte(channel), nil)
 	}
 	return driver.bus.WriteByteBlock(i2cAddress, cmdReset, []byte{0xFF})
 }
 
 func (driver sn3218) Enable(enable bool) error {
+
+	zap.S().Debugw("SN3218", "func", "Enable", "state", enable)
+
 	if enable {
 		return driver.bus.WriteByteBlock(i2cAddress, cmdEnableOutput, []byte{0x01})
 	} else {
@@ -84,6 +90,8 @@ func (driver sn3218) Enable(enable bool) error {
 // EnableLEDs enables or disables an individual LED channel.
 // The argument is a binary channel mask.
 func (driver sn3218) EnableLEDs(mask uint32) error {
+
+	zap.S().Debugw("SN3218", "func", "EnableLEDs", "state", fmt.Sprintf("%018b", mask))
 
 	if err := driver.bus.WriteByteBlock(i2cAddress, cmdEnableLeds, []byte{byte(mask & 0x3F), byte((mask >> 6) & 0x3F), byte((mask >> 12) & 0x3F)}); err != nil {
 		return err
@@ -131,7 +139,9 @@ func (driver sn3218) GetLED(channel uint8) byte {
 }
 
 func (driver *sn3218) SetLED(channel uint8, intensity byte) error {
-	zap.S().Debugw("SetLED", "channel", channel, "intensity", intensity)
+
+	zap.S().Debugw("SN3218", "func", "SetLED", "channel", channel, "intensity", intensity)
+
 	driver.values[channel] = intensity
 	return driver.Output(driver.values)
 }

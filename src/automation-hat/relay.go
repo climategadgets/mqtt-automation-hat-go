@@ -42,7 +42,7 @@ func (r *relay) Set(state bool) bool {
 
 	r.state = state
 
-	zap.S().Infow("set", "entityType", "relay", "pin", r.pin, "ledNO", r.ledNO, "ledNC", r.ledNC, "state", r.state, "changed", changed)
+	zap.S().Infow("relay", "func", "Set", "entityType", "relay", "pin", r.pin, "ledNO", r.ledNO, "ledNC", r.ledNC, "state", r.state, "changed", changed)
 
 	// VT: NOTE: Counterintuitively, 'changed' is not always true. Remains to be seen how useful it is, though
 	r.control <- relayCommand{*r, changed}
