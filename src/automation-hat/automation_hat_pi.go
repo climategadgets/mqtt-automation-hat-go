@@ -55,12 +55,24 @@ func newAutomationHAT() AutomationHAT {
 	reset(&hat)
 
 	ledDriver.Enable(true)
-
-	// 0b111111111111111111, all of them
-	ledDriver.EnableLEDs(0x3FFFF)
+	ledDriver.EnableLEDs(0x3FFFF) // 0b111111111111111111, all of them
 
 	zap.S().Info("init: giving the board a chance to settle...")
-	time.Sleep(500 * time.Millisecond)
+
+	// ...and to make sure all LEDs are functional
+	for channel := 0; channel < 18; channel++ {
+		ledDriver.SetLED(byte(channel), 0xFF) // Full intensity to attract attention
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	time.Sleep(400 * time.Millisecond)
+
+	for channel := 0; channel < 18; channel++ {
+		ledDriver.SetLED(byte(channel), 0)
+	}
+
+	time.Sleep(100 * time.Millisecond)
+
 	zap.S().Info("init: done")
 
 	return hat
