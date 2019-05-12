@@ -15,6 +15,7 @@ func TestLights(t *testing.T) {
 	defer logger.Sync()
 
 	hat := GetAutomationHAT()
+	defer hat.Close()
 	lights := make([]Light, 0)
 
 	for _, adc := range hat.ADC24() {
