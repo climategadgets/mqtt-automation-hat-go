@@ -30,7 +30,7 @@ func TestRelaySwitch(t *testing.T) {
 	defer logger.Sync()
 
 	hat := GetAutomationHAT()
-	defer hat.Close()
+	//defer hat.Close()
 
 	testSwitch(t, hat.Relay()[0])
 }
@@ -43,7 +43,7 @@ func TestLightSwitch(t *testing.T) {
 	defer logger.Sync()
 
 	hat := GetAutomationHAT()
-	defer hat.Close()
+	//defer hat.Close()
 
 	testSwitch(t, hat.StatusLights().Power())
 }
