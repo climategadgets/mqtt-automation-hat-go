@@ -3,12 +3,17 @@
 package sn3218
 
 import (
+	"go.uber.org/zap"
 	"testing"
 	"time"
 )
 
 // TestLightRing lights one LED at a time using EnableLEDs()
 func TestLightRing(t *testing.T) {
+
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
 
 	values := [18]byte{}
 	for offset := 0; offset < 18; offset++ {
@@ -37,6 +42,10 @@ func TestLightRing(t *testing.T) {
 
 func TestLightFadeSimple(t *testing.T) {
 
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
+
 	driver := GetSN3218()
 	defer driver.Close()
 
@@ -52,6 +61,10 @@ func TestLightFadeSimple(t *testing.T) {
 
 func TestLightGammaAllocation(t *testing.T) {
 
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
+
 	driver := GetSN3218()
 	defer driver.Close()
 
@@ -63,6 +76,10 @@ func TestLightGammaAllocation(t *testing.T) {
 }
 
 func TestLightFadeInverted(t *testing.T) {
+
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
 
 	driver := GetSN3218()
 	defer driver.Close()
@@ -110,6 +127,10 @@ func fade(driver SN3218) {
 
 // TestLightRingSet lights LEDs one by one using SetLED()
 func TestLightFill(t *testing.T) {
+
+	logger, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(logger)
+	defer logger.Sync()
 
 	driver := GetSN3218()
 	defer driver.Close()
