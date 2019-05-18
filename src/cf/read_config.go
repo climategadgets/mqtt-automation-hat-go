@@ -16,6 +16,7 @@ type SwitchConfig struct {
 var defaultCfDir = ".mqtt-automation-hat"
 var defaultCfFile = "config.json"
 
+// The key is the switch ID, the value is the switch config
 type ConfigSwitchMap map[string]SwitchConfig
 type ConfigHAT map[string]ConfigSwitchMap
 
