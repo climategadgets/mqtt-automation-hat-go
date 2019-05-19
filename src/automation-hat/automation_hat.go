@@ -90,7 +90,7 @@ func initialize(hat *automationHatBase) {
 	hat.relay[1] = GetRelay(control, 19, 8, 9)
 	hat.relay[2] = GetRelay(control, 16, 10, 11)
 
-	hat.adc33 = GetADC33(3, 3.3)
+	hat.adc33 = GetADC33(control, 3, 3.3)
 
 	hat.status = statusLights{power: GetLED(control, 17), comms: GetLED(control, 16), warn: GetLED(control, 15)}
 }

@@ -97,6 +97,8 @@ func execute(hat automationHatPi, message interface{}) {
 		executeRelay(hat, command)
 	case lightCommand:
 		executeLight(hat, command)
+	case adcCommand:
+		executeAdc(hat, command)
 	default:
 		zap.S().Errorw("don't know how to execute", "message", message)
 	}
@@ -131,6 +133,17 @@ func executeLight(hat automationHatPi, command lightCommand) {
 	} else {
 		hat.ledDriver.SetLED(command.pin, 0)
 	}
+}
+
+func executeAdc(hat automationHatPi, command adcCommand) {
+
+	zap.S().Debugw("executeAdc", "channel", command.channel)
+
+	// VT: FIXME: Need to actually read the value
+	*command.signal = 42.0
+	command.done.Done()
+
+	zap.S().Errorw("executeAdc: FIXME", "signal", *command.signal)
 }
 
 func reset(hat *automationHatPi) {
