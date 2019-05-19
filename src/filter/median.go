@@ -23,7 +23,10 @@ func NewMedianFilter(size uint8) Filter {
 		size++
 	}
 
-	return &median{make([]float64, size), 0, make([]float64, size), size, uint8((size - 1) / 2)}
+	return &median{
+		input: make([]float64, size), offset: 0,
+		sorted: make([]float64, size),
+		unknown: size, median: uint8((size - 1) / 2)}
 }
 
 // Consume applies the median filter as described in https://en.wikipedia.org/wiki/Median_filter
