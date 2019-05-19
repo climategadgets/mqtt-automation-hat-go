@@ -24,8 +24,8 @@ func NewMedianFilter(size uint8) Filter {
 	}
 
 	return &median{
-		input: make([]float64, size), offset: 0,
-		sorted: make([]float64, size),
+		input:   make([]float64, size),
+		sorted:  make([]float64, size),
 		unknown: size, median: uint8((size - 1) / 2)}
 }
 
