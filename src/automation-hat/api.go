@@ -41,19 +41,30 @@ type Relay interface {
 	Light() [2]Light
 }
 
+// Analog Input 3.3V
 type ADC33 interface {
+
+	// Get the input voltage, in millivolts
+	Get() float64
 }
 
+// Analog Input 24V
 type ADC24 interface {
 	ADC33
 	Light() Light
 }
 
+// Digital Input
 type Input interface {
 	Light() Light
+
+	// Get current state
+	Get() bool
 }
 
+// Digital Output
 type Output interface {
+	Switch
 	Light() Light
 }
 

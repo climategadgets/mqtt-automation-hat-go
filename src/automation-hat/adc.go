@@ -19,3 +19,7 @@ func GetADC33(channel uint8, maxVoltage float64) ADC33 {
 func GetADC24(control chan<- interface{}, channel uint8, maxVoltage float64, ledPin uint8) ADC24 {
 	return adcLed{adc: adc{channel: channel, maxVoltage: maxVoltage}, ledContainer: ledContainer{GetLED(control, ledPin)}}
 }
+
+func (adc adc) Get() float64 {
+	panic("Not Implemented")
+}
