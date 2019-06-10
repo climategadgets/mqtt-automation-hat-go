@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+const (
+	ledIntensity = 0x33 // LEDs are extremely bright even in daylight
+)
+
 func newAutomationHAT() AutomationHAT {
 
 	zap.S().Info("creating new instance of AutomationHAT")
@@ -61,7 +65,7 @@ func newAutomationHAT() AutomationHAT {
 
 	// ...and to make sure all LEDs are functional
 	for channel := 0; channel < 18; channel++ {
-		ledDriver.SetLED(byte(channel), 0xFF) // Full intensity to attract attention
+		ledDriver.SetLED(byte(channel), ledIntensity)
 		time.Sleep(10 * time.Millisecond)
 	}
 
@@ -103,10 +107,6 @@ func execute(hat automationHatPi, message interface{}) {
 		zap.S().Errorw("don't know how to execute", "message", message)
 	}
 }
-
-const (
-	ledIntensity = 0x33 // LEDs are extremely bright even in daylight
-)
 
 func executeRelay(hat automationHatPi, command relayCommand) {
 
